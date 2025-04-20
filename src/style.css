@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
 :root {
   color: #ffffff;
   background-color: #213547;
@@ -7,7 +10,7 @@ html,
 body { 
   height: 100%;
   margin: 0; 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 canvas { 
@@ -16,15 +19,27 @@ canvas {
   left: 0;
   z-index: -1;
   display: block; 
-  background-color: hotpink;
+  background-color: black;
   width: 100%;
   height: 100%;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+canvas.visible {
+  opacity: 1;
 }
 
 .content {
   max-width: 600px;
   margin: 0 auto;
   font-size: 200%;
+}
+
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2em;
+  margin: 0;
 }
 /* 
 @media (prefers-color-scheme: light) {

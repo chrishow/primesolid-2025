@@ -21,7 +21,7 @@ function hexToRgbNormalized(hex: string): [number, number, number] {
 }
 
 // Define your colors using hex strings
-const baseColorHex = '#050a1a'; // Deep dark blue
+const baseColorHex = '#051a1a'; // Deep dark blue
 const lowlightColorHex = '#2a0a4a'; // Dark purple
 const midtoneColorHex = '#000000'; // Black
 const highlightColorHex = '#00ffff'; // Bright cyan
@@ -34,16 +34,19 @@ sandbox.setUniform('u_lowlightColor', ...hexToRgbNormalized(lowlightColorHex));
 sandbox.setUniform('u_midtoneColor', ...hexToRgbNormalized(midtoneColorHex));
 sandbox.setUniform('u_highlightColor', ...hexToRgbNormalized(highlightColorHex));
 
+// Add the 'visible' class to trigger the fade-in after setup
+canvas.classList.add('visible');
+
 // --- Scroll-based speed control ---
 const defaultSpeed = 1.0;
-// const scrollSpeed = 5.0; // No longer a fixed scroll speed
 const lerpFactor = 0.05; // How quickly to interpolate (adjust for smoothness)
-const scrollVelocityFactor = 0.1; // Adjust to control sensitivity to scroll speed
-const maxSpeedIncrease = 10.0; // Maximum speed increase from scrolling
+const scrollVelocityFactor = 0.1; // Adjust to control sensitivity to scroll speed (FORWARD)
+const backwardScrollFactor = 0.2; // Make backward scroll faster
+const maxSpeedIncrease = 10.0; // Maximum speed increase magnitude
 
 let currentSpeed = defaultSpeed;
 let targetSpeed = defaultSpeed;
-let scrollTimeout: number | null = null;
+let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
 let customTime = 0;
 let lastTimestamp = 0;
 let lastScrollY = window.scrollY; // Track last scroll position
@@ -84,13 +87,15 @@ window.addEventListener('scroll', () => {
   const deltaY = currentScrollY - lastScrollY;
   lastScrollY = currentScrollY; // Update for next event
 
-  // Calculate speed increase based on scroll velocity
-  // Use Math.abs as direction doesn't matter for speed increase
-  // Clamp the increase to avoid excessively high speeds
-  const speedIncrease = Math.min(Math.abs(deltaY) * scrollVelocityFactor, maxSpeedIncrease);
+  // Determine the factor based on scroll direction
+  const factor = deltaY < 0 ? backwardScrollFactor : scrollVelocityFactor;
 
-  // Set target speed based on default speed + calculated increase
-  targetSpeed = defaultSpeed + speedIncrease;
+  // Calculate speed change based on scroll velocity (signed) and direction-specific factor
+  // Clamp the magnitude of the change to avoid excessively high speeds
+  const speedChange = Math.sign(deltaY) * Math.min(Math.abs(deltaY) * factor, maxSpeedIncrease);
+
+  // Target speed is now default speed + signed change
+  targetSpeed = defaultSpeed + speedChange;
 
   // Clear any existing timeout
   if (scrollTimeout !== null) {
@@ -105,10 +110,10 @@ window.addEventListener('scroll', () => {
 });
 // --- End scroll-based speed control ---
 
-// Example of how to change a color later using hex
-function changeBaseColor(newHexColor: string) {
-  sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(newHexColor));
-}
+// // Example of how to change a color later using hex
+// function changeBaseColor(newHexColor: string) {
+//   sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(newHexColor));
+// }
 
 setTimeout(() => {
   // changeBaseColor('#FF0000'); // Change base color to red

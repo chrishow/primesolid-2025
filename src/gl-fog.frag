@@ -1,4 +1,4 @@
-// Author @patriciogv - 2015
+// Baed on shader by @patriciogv - 2015
 // http://patriciogonzalezvivo.com
 
 #ifdef GL_ES
