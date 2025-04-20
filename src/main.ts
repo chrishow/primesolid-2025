@@ -36,13 +36,17 @@ sandbox.setUniform('u_highlightColor', ...hexToRgbNormalized(highlightColorHex))
 
 // --- Scroll-based speed control ---
 const defaultSpeed = 1.0;
-const scrollSpeed = 5.0; // Speed when scrolling
+// const scrollSpeed = 5.0; // No longer a fixed scroll speed
 const lerpFactor = 0.05; // How quickly to interpolate (adjust for smoothness)
+const scrollVelocityFactor = 0.1; // Adjust to control sensitivity to scroll speed
+const maxSpeedIncrease = 10.0; // Maximum speed increase from scrolling
+
 let currentSpeed = defaultSpeed;
 let targetSpeed = defaultSpeed;
 let scrollTimeout: number | null = null;
 let customTime = 0;
 let lastTimestamp = 0;
+let lastScrollY = window.scrollY; // Track last scroll position
 
 // Set the initial custom time
 sandbox.setUniform('u_customTime', customTime);
@@ -76,15 +80,24 @@ function animationLoop(timestamp: number) {
 requestAnimationFrame(animationLoop);
 
 window.addEventListener('scroll', () => {
-  // Set target speed higher when scrolling
-  targetSpeed = scrollSpeed;
+  const currentScrollY = window.scrollY;
+  const deltaY = currentScrollY - lastScrollY;
+  lastScrollY = currentScrollY; // Update for next event
+
+  // Calculate speed increase based on scroll velocity
+  // Use Math.abs as direction doesn't matter for speed increase
+  // Clamp the increase to avoid excessively high speeds
+  const speedIncrease = Math.min(Math.abs(deltaY) * scrollVelocityFactor, maxSpeedIncrease);
+
+  // Set target speed based on default speed + calculated increase
+  targetSpeed = defaultSpeed + speedIncrease;
 
   // Clear any existing timeout
   if (scrollTimeout !== null) {
     clearTimeout(scrollTimeout);
   }
 
-  // Set a timeout to reset target speed after scrolling stops
+  // Set a timeout to reset target speed back to default after scrolling stops
   scrollTimeout = setTimeout(() => {
     targetSpeed = defaultSpeed;
     scrollTimeout = null; // Clear the timeout ID
