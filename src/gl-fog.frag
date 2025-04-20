@@ -8,7 +8,8 @@ precision mediump float;
 uniform vec2 u_resolution; // GlslCanvas provides these automatically
 uniform vec2 u_mouse;      // GlslCanvas provides these automatically
 uniform float u_time;      // GlslCanvas provides these automatically
-uniform float u_speed;     // Add this line for speed control
+uniform float u_speed;     // Speed control from JS
+uniform float u_customTime; // Custom time controlled by JS
 
 uniform vec3 u_baseColor;
 uniform vec3 u_lowlightColor;
@@ -85,8 +86,9 @@ void main() {
     q.y = fbm( st + vec2(1.0));
 
     vec2 r = vec2(0.);
-    r.x = fbm( st + 1.0*q + vec2(1.7,9.2)+ 0.15*u_time * u_speed ); 
-    r.y = fbm( st + 1.0*q + vec2(8.3,2.8)+ 0.126*u_time * u_speed);
+    // Use u_customTime instead of u_time * u_speed
+    r.x = fbm( st + 1.0*q + vec2(1.7,9.2)+ 0.15*u_customTime ); 
+    r.y = fbm( st + 1.0*q + vec2(8.3,2.8)+ 0.126*u_customTime );
 
     float f = fbm(st+r);
 

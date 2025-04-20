@@ -34,13 +34,68 @@ sandbox.setUniform('u_lowlightColor', ...hexToRgbNormalized(lowlightColorHex));
 sandbox.setUniform('u_midtoneColor', ...hexToRgbNormalized(midtoneColorHex));
 sandbox.setUniform('u_highlightColor', ...hexToRgbNormalized(highlightColorHex));
 
-// Set the animation speed (1.0 is default, >1 faster, <1 slower)
-sandbox.setUniform('u_speed', 2.0);
+// --- Scroll-based speed control ---
+const defaultSpeed = 1.0;
+const scrollSpeed = 5.0; // Speed when scrolling
+const lerpFactor = 0.05; // How quickly to interpolate (adjust for smoothness)
+let currentSpeed = defaultSpeed;
+let targetSpeed = defaultSpeed;
+let scrollTimeout: number | null = null;
+let customTime = 0;
+let lastTimestamp = 0;
+
+// Set the initial custom time
+sandbox.setUniform('u_customTime', customTime);
+
+// Linear interpolation function
+function lerp(start: number, end: number, amt: number): number {
+  return (1 - amt) * start + amt * end;
+}
+
+// Animation loop to handle both speed and time
+function animationLoop(timestamp: number) {
+  if (lastTimestamp === 0) {
+    lastTimestamp = timestamp; // Initialize on first frame
+  }
+  const deltaTime = (timestamp - lastTimestamp) / 1000; // Delta time in seconds
+  lastTimestamp = timestamp;
+
+  // Interpolate speed smoothly
+  currentSpeed = lerp(currentSpeed, targetSpeed, lerpFactor);
+
+  // Increment custom time based on current speed
+  customTime += currentSpeed * deltaTime;
+
+  // Update the custom time uniform in the shader
+  sandbox.setUniform('u_customTime', customTime);
+
+  requestAnimationFrame(animationLoop);
+}
+
+// Start the animation loop
+requestAnimationFrame(animationLoop);
+
+window.addEventListener('scroll', () => {
+  // Set target speed higher when scrolling
+  targetSpeed = scrollSpeed;
+
+  // Clear any existing timeout
+  if (scrollTimeout !== null) {
+    clearTimeout(scrollTimeout);
+  }
+
+  // Set a timeout to reset target speed after scrolling stops
+  scrollTimeout = setTimeout(() => {
+    targetSpeed = defaultSpeed;
+    scrollTimeout = null; // Clear the timeout ID
+  }, 150); // Reset speed 150ms after the last scroll event
+});
+// --- End scroll-based speed control ---
 
 // Example of how to change a color later using hex
-// function changeBaseColor(newHexColor: string) {
-//   sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(newHexColor));
-// }
+function changeBaseColor(newHexColor: string) {
+  sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(newHexColor));
+}
 
 setTimeout(() => {
   // changeBaseColor('#FF0000'); // Change base color to red
