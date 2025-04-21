@@ -1,9 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Workbench&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=block');
 
 :root {
-  color: #ffffff;
-  background-color: #213547;
+  --text-color: #213547; /* Dark blue for light mode */
+  --background-color: #ffffff; /* White for light mode */
+
+  color: var(--text-color);
+  background-color: var(--background-color);
 }
 
 html,
@@ -31,21 +34,41 @@ canvas.visible {
 }
 
 .content {
-  max-width: 600px;
+  padding-top: 3em;
+  max-width: 75ch;
   margin: 0 auto;
-  font-size: 200%;
+  font-size: 120%;
+  line-height: 1.5;;
+}
+
+h1, h2 {
+  font-family: 'Workbench', sans-serif;
+  font-weight: 400;
 }
 
 h1 {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Workbench', sans-serif;
   font-size: 2em;
   margin: 0;
+  font-weight: 400;
 }
-/* 
+
+.content > * {
+  opacity: 0.4;
+  transition: opacity 0.25s ease-in-out;
+
+  &.done-glitching {
+    opacity: 1;
+  }  
+}
+
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --text-color: #213547;
+    --background-color: #ffffff;
+
+    color: var(--text-color);
+    background-color: var(--background-color);
   }
   a:hover {
     color: #747bff;
@@ -53,4 +76,16 @@ h1 {
   button {
     background-color: #f9f9f9;
   }
-} */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: rgb(255, 255, 255); /* Light gray for dark mode */
+    --background-color: #1a1a1a; /* Very dark gray for dark mode */
+  }
+
+  /* Optional: Adjust canvas background for dark mode if needed */
+  /* canvas {
+    background-color: #111; 
+  } */
+}
