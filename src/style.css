@@ -80,15 +80,40 @@ h1 {
   }
 
   .tv-frame {
+    position: absolute;
     width: 100%;
     height: 100%;
-    position: absolute;
     top: 0;
     left: 0;
     background: url(i/screen-frame.png) 0 0 no-repeat;
     background-size: cover;
     pointer-events: none;
   }
+
+  .scanlines {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 9999;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;  
+  }
+
+  .wobbly {
+    animation: wobbly 100ms infinite;    
+  }
+}
+
+@keyframes wobbly {
+	0% {
+		transform: translateY(1px);
+	}
+	100% {
+		transform: translateY(0);
+	}
 }
 
 @media (prefers-color-scheme: light) {
