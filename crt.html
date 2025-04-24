@@ -6,7 +6,7 @@
   <style>
     html, body {
       margin: 0;
-      background: #000;
+      background: #666;
       height: 100%;
       display: flex;
       justify-content: center;
@@ -18,8 +18,6 @@
       width: 640px; /* Match canvas size */
       height: 480px; /* Match canvas size */
       overflow: hidden;
-      /* Optional: Add back border-radius if desired */
-      /* border-radius: 50px; */
     }
 
     #crt-canvas {
@@ -35,6 +33,11 @@
     <!-- Canvas replaces the img tag -->
     <canvas id="crt-canvas" width="640" height="480"></canvas>
   </div>
+
+  <!-- Hidden video element for texture source -->
+  <video id="crt-video" src="src/i/crush.mp4" 
+         loop muted playsinline 
+         style="display: none;"></video>
 
   <!-- Vertex Shader -->
   <script id="vertex-shader" type="x-shader/x-vertex">
@@ -132,34 +135,42 @@
         1, 1,    // Corresponds to  1,  1
       ]), gl.STATIC_DRAW);
 
-      // 5. Load the image and create texture
+      // 5. Get video element and create texture
+      const video = document.getElementById('crt-video');
       const texture = createTexture(gl);
-      const image = new Image();
-      image.src = 'src/i/test-card.jpg'; // Path to your image
-      image.onload = () => {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-        // Set filtering after loading data
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      let videoReady = false;
 
-        // Start rendering after image loads
-        requestAnimationFrame(render);
-      };
-      image.onerror = () => {
-          console.error("Failed to load image:", image.src);
-          // Optionally draw a solid color or placeholder if image fails
-          gl.bindTexture(gl.TEXTURE_2D, texture);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 0, 255, 255])); // Magenta pixel
-          requestAnimationFrame(render);
-      }
+      // Wait for video to be ready to play
+      video.addEventListener('canplay', () => {
+        videoReady = true;
+        video.play(); // Start playback
+        requestAnimationFrame(render); // Start render loop
+      }, { once: true });
 
+      video.addEventListener('error', (e) => {
+        console.error("Video error:", e);
+        alert("Failed to load video.");
+      });
 
       // --- Render Loop ---
+      let lastTime = 0;
       function render(time) {
+        time *= 0.001; // convert time to seconds
+        const deltaTime = time - lastTime;
+        lastTime = time;
+
+        // Update texture if video is ready and has new data
+        if (videoReady && video.readyState >= video.HAVE_CURRENT_DATA) {
+          gl.bindTexture(gl.TEXTURE_2D, texture);
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+          // Set filtering parameters (needed each time for video? Maybe not, but safe)
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        }
+
         // Set viewport and clear
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0, 0, 0, 0);
@@ -189,8 +200,8 @@
         // Draw the quad (6 vertices)
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-        // Optional: Keep animating if needed, otherwise just draw once
-        // requestAnimationFrame(render);
+        // Keep the loop going
+        requestAnimationFrame(render);
       }
     }
 
@@ -227,7 +238,7 @@
     function createTexture(gl) {
       const texture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      // Put a single pixel until image loads
+      // Put a single pixel until video loads
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255])); // Black pixel
       return texture;
     }
