@@ -1,4 +1,3 @@
-import './style.css'
 import fragmentSource from './gl-fog.frag?raw';
 import { setupCanvas } from './canvasSetup';
 import { initializeGlitchEffect } from './glitchEffect';
@@ -11,4 +10,4 @@ if (canvas) {
   console.error("Could not find canvas element with ID 'glslCanvas'");
 }
 
-initializeGlitchEffect('.content >  *');
+initializeGlitchEffect('.content >  *:not(div)');
