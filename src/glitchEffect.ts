@@ -1,5 +1,5 @@
 // --- Glitch Text Effect ---
-const glitchChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; // Simplified ASCII characters
+const glitchChars = '0123456789';
 
 // Map to store active interval IDs for glitching elements
 const activeGlitches = new Map<HTMLElement, number>();
