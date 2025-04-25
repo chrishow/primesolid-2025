@@ -35,7 +35,7 @@ canvas.visible {
 
 .content {
   padding-top: 3em;
-  max-width: 75ch;
+  max-width: 889px;
   margin: 0 auto;
   font-size: 120%;
   line-height: 1.5;;
@@ -64,53 +64,86 @@ h1 {
 
 .projects {
   position: relative;
-  & .project {
+
+  & .tv {
+    position: relative;
     overflow: hidden;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 889/627;
 
-    .preview {
-      aspect-ratio: 4 / 3;
-      background-color: black;;
+    & .tv-case, 
+    & .tv-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
 
-      video {
-        border: 0;
+      background: transparent url(i/tv-case.png) no-repeat center center;
+      background-size: cover;
+    }
+
+    & .tv-screen {
+      background: transparent url(i/tv-screen.png) no-repeat center center;
+      background-size: cover;
+      mix-blend-mode: lighten;
+    }
+
+    & .movie {
+      position: absolute;
+      overflow: hidden;
+      top: 13%;
+      left: 8.5%;
+      width: 59%;
+      height: 61%;
+      z-index: 0;
+      background-color: black;
+
+      & video {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
       }
-    }    
-  }
 
-  .tv-frame {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    background: url(i/screen-frame.png) 0 0 no-repeat;
-    background-size: cover;
-    pointer-events: none;
-  }
 
-  .scanlines {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    background-size: 100% 2px, 3px 100%;
-    pointer-events: none;  
-  }
+      & .scanlines {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+        background-size: 100% 2px, 3px 100%;
+        pointer-events: none;
+        opacity: 0.75;
+      }
+    
+      & .overlay-canvas {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        pointer-events: none;
+        background-color: transparent;
+        z-index: 2;
+        opacity: 0.75;
+      }
+    
+    }
 
-  .overlay-canvas {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-    pointer-events: none;
-    background-color: transparent;
-    z-index: 2;
-    opacity: 0.75;
+    & .back-mask {
+      position: absolute;
+      top: 12%;
+      left: 8%;
+      width: 60%;
+      height: 65%;
+      z-index: -1;
+      background-color: black;
+    }
   }
 
   .wobbly {
