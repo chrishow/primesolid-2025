@@ -1,8 +1,5 @@
-const canvas = document.querySelector('.overlay-canvas') as HTMLCanvasElement;
-let ctx: CanvasRenderingContext2D | null = null;
-
-export function generateVCRNoise() {
-    ctx = canvas.getContext('2d');
+export function generateVCRNoise(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d');
 
     const fps = 61;
     let vcrInterval: any = null;
@@ -12,7 +9,7 @@ export function generateVCRNoise() {
             cancelAnimationFrame(vcrInterval);
         }
         const animate = () => {
-            renderTrackingNoise();
+            renderTrackingNoise(canvas, ctx);
             vcrInterval = requestAnimationFrame(animate);
         };
 
@@ -27,7 +24,7 @@ export function generateVCRNoise() {
     }
 }
 
-function renderTrackingNoise() {
+function renderTrackingNoise(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
     const radius = 1;
     let posy1 = 100;
     let posy2 = canvas!.height - 10;

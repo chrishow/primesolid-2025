@@ -1,16 +1,17 @@
 import fragmentSource from './gl-fog.frag?raw';
-import { setupCanvas } from './canvasSetup';
+import { setupFog } from './fog';
 import { initializeGlitchEffect } from './glitchEffect';
-import { generateVCRNoise } from './vcrNoise';
+import { TV } from './tv';
+
 
 const canvas = document.getElementById('glslCanvas') as HTMLCanvasElement | null;
 
 if (canvas) {
-  setupCanvas(canvas, fragmentSource);
+  setupFog(canvas, fragmentSource);
 } else {
   console.error("Could not find canvas element with ID 'glslCanvas'");
 }
 
 initializeGlitchEffect('.content >  *:not(div)');
 
-generateVCRNoise();
+new TV();

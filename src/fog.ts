@@ -30,7 +30,7 @@ const darkModeColors = {
     highlight: '#8d99ae' // Darker Gray (Cloud Highlight/Moonlight - was #adb5bd)
 };
 
-export function setupCanvas(canvas: HTMLCanvasElement, fragmentSource: string) {
+export function setupFog(canvas: HTMLCanvasElement, fragmentSource: string) {
     const sandbox = new GlslCanvas(canvas);
     sandbox.load(fragmentSource);
 
