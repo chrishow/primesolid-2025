@@ -65,16 +65,16 @@ h1 {
 .projects {
   position: relative;
   & .project {
+    overflow: hidden;
 
     .preview {
       aspect-ratio: 4 / 3;
-      overflow: hidden;
+      background-color: black;;
 
-      iframe {
+      video {
         border: 0;
-        width: 200%;
-        height: 200%;
-        transform: scale(0.5) translate(-50%, -50%);
+        width: 100%;
+        height: 100%;
       }
     }    
   }
@@ -96,25 +96,81 @@ h1 {
     position: absolute;
     left: 0;
     top: 0;
-    z-index: 9999;
     background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
     background-size: 100% 2px, 3px 100%;
     pointer-events: none;  
   }
 
+  .overlay-canvas {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    background-color: transparent;
+    z-index: 2;
+    opacity: 0.75;
+  }
+
   .wobbly {
     animation: wobbly 100ms infinite;    
   }
+
+  .glitch {
+    animation: 5s ease 20ms normal none infinite running glitch;
+  }
+
+  .tube-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    background: url('i/tube-frame.png') no-repeat center center;
+    background-size: cover; /* Cover the entire canvas */
+    /* pointer-events: none; Allow clicks to pass through */
+  }
+
 }
 
 @keyframes wobbly {
 	0% {
-		transform: translateY(1px);
+		transform: translateY(1.5px);
 	}
 	100% {
 		transform: translateY(0);
 	}
 }
+
+@keyframes glitch {
+	30% {
+	}
+	40% {
+		opacity: 1;
+		transform: scale(1, 1);
+		transform: skew(0, 0);
+	}
+	41% {
+		opacity: 0.8;
+		transform: scale(1, 1.2);
+		transform: skew(80deg, 0);
+	}
+	42% {
+		opacity: 0.8;
+		transform: scale(1, 1.2);
+		transform: skew(-50deg, 0);
+	}
+	43% {
+		opacity: 1;
+		transform: scale(1, 1);
+		transform: skew(0, 0);
+	}
+	65% {
+	}
+}
+
 
 @media (prefers-color-scheme: light) {
   :root {

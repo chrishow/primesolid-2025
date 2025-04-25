@@ -1,6 +1,7 @@
 import fragmentSource from './gl-fog.frag?raw';
 import { setupCanvas } from './canvasSetup';
 import { initializeGlitchEffect } from './glitchEffect';
+import { generateVCRNoise } from './vcrNoise';
 
 const canvas = document.getElementById('glslCanvas') as HTMLCanvasElement | null;
 
@@ -11,3 +12,5 @@ if (canvas) {
 }
 
 initializeGlitchEffect('.content >  *:not(div)');
+
+generateVCRNoise();

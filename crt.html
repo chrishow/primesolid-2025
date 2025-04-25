@@ -8,9 +8,6 @@
       margin: 0;
       background: #666;
       height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
     .crt-container {
@@ -18,12 +15,24 @@
       width: 640px; /* Match canvas size */
       height: 480px; /* Match canvas size */
       overflow: hidden;
+      margin: 1em auto;
     }
 
     #crt-canvas {
       display: block; /* Prevent extra space below canvas */
       width: 100%;
       height: 100%;
+    }
+
+    .tube-frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('src/i/tube-frame.png') no-repeat center center;
+      background-size: cover; /* Cover the entire canvas */
+      pointer-events: none; /* Allow clicks to pass through */
     }
   </style>
 </head>
@@ -32,10 +41,18 @@
   <div class="crt-container">
     <!-- Canvas replaces the img tag -->
     <canvas id="crt-canvas" width="640" height="480"></canvas>
+    <div class="tube-frame"></div>      
+  </div>
+
+  
+  <!-- Channel Switch Buttons -->
+  <div style="text-align: center; margin-top: 10px;">
+    <button id="channel1-btn">Channel 1 (Wayve)</button>
+    <button id="channel2-btn">Channel 2 (Crush)</button>
   </div>
 
   <!-- Hidden video element for texture source -->
-  <video id="crt-video" src="src/i/crush.mp4" 
+  <video id="crt-video" src="src/i/wayve.mp4" 
          loop muted playsinline 
          style="display: none;"></video>
 
@@ -90,12 +107,15 @@
   <!-- WebGL Setup Script -->
   <script>
     function main() {
+      console.log("main() started"); // <-- Add log
+
       const canvas = document.getElementById('crt-canvas');
       const gl = canvas.getContext('webgl');
       if (!gl) {
         alert('WebGL not supported');
         return;
       }
+      console.log("WebGL context obtained"); // <-- Add log
 
       // 1. Get shader source
       const vsSource = document.getElementById('vertex-shader').text;
@@ -112,44 +132,98 @@
       const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 
       // 4. Create buffers for a unit quad
-      //    (2 triangles covering clip space -1 -> +1)
       const positionBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-        -1, -1,   // Triangle 1
-         1, -1,
-        -1,  1,
-        -1,  1,   // Triangle 2
-         1, -1,
-         1,  1,
+        -1, -1,   1, -1,  -1,  1,
+        -1,  1,   1, -1,   1,  1,
       ]), gl.STATIC_DRAW);
 
       const texCoordBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-        0, 0,    // Corresponds to -1, -1
-        1, 0,    // Corresponds to  1, -1
-        0, 1,    // Corresponds to -1,  1
-        0, 1,    // Corresponds to -1,  1
-        1, 0,    // Corresponds to  1, -1
-        1, 1,    // Corresponds to  1,  1
+        0, 0,   1, 0,   0, 1,
+        0, 1,   1, 0,   1, 1,
       ]), gl.STATIC_DRAW);
 
       // 5. Get video element and create texture
       const video = document.getElementById('crt-video');
+      if (!video) {
+          console.error("Could not find video element #crt-video"); // <-- Add check
+          return;
+      }
       const texture = createTexture(gl);
       let videoReady = false;
+      let renderLoopRunning = false;
 
-      // Wait for video to be ready to play
+      // --- Video Sources ---
+      const videoSources = {
+        channel1: 'src/i/wayve.mp4',
+        channel2: 'src/i/crush.mp4'
+      };
+
+      // --- Button Setup ---
+      const channel1Btn = document.getElementById('channel1-btn');
+      const channel2Btn = document.getElementById('channel2-btn');
+
+      function switchVideoSource(newSrc) {
+        const currentFullSrc = video.currentSrc; // Get the full URL
+        // Check if the *end* of the current source matches the new relative source
+        if (currentFullSrc && currentFullSrc.endsWith(newSrc)) {
+          console.log("Already playing:", newSrc);
+          return;
+        }
+        console.log("Switching video to:", newSrc);
+        videoReady = false; // Video needs to load new source
+        video.pause(); // Pause current playback
+        video.src = newSrc;
+        video.load(); // Important: Load the new source
+        // The 'canplay' listener below will handle playing when ready
+      }
+
+      channel1Btn.addEventListener('click', () => switchVideoSource(videoSources.channel1));
+      channel2Btn.addEventListener('click', () => switchVideoSource(videoSources.channel2));
+
+      // --- Event Listeners ---
+      console.log("Setting up video event listeners..."); // <-- Add log
+      // Persistent listener for when the video (current or new source) is ready
       video.addEventListener('canplay', () => {
-        videoReady = true;
-        video.play(); // Start playback
-        requestAnimationFrame(render); // Start render loop
-      }, { once: true });
+          console.log("Video event: canplay fired for", video.src); // <-- Modify log
+          videoReady = true;
+          video.play().catch(e => console.error("Autoplay failed:", e));
+          if (!renderLoopRunning) {
+              console.log("Starting render loop.");
+              requestAnimationFrame(render);
+              renderLoopRunning = true;
+          }
+      });
 
       video.addEventListener('error', (e) => {
         console.error("Video error:", e);
-        alert("Failed to load video.");
+        // More specific error check
+        const videoError = video.error;
+        if (videoError) {
+            let errorMsg = "Unknown video error";
+            switch (videoError.code) {
+                case 1: // MEDIA_ERR_ABORTED
+                    errorMsg = 'Video playback aborted.';
+                    break;
+                case 2: // MEDIA_ERR_NETWORK
+                    errorMsg = 'A network error caused video download to fail.';
+                    break;
+                case 3: // MEDIA_ERR_DECODE
+                    errorMsg = 'Video playback aborted due to decoding error.';
+                    break;
+                case 4: // MEDIA_ERR_SRC_NOT_SUPPORTED
+                    errorMsg = 'Video source format not supported.';
+                    break;
+                default:
+                    errorMsg = `An unknown error occurred (Code: ${videoError.code})`;
+            }
+            alert(`Failed to load video: ${errorMsg}`);
+        } else {
+            alert("Failed to load video (unknown error).");
+        }
       });
 
       // --- Render Loop ---
@@ -160,15 +234,11 @@
         lastTime = time;
 
         // Update texture if video is ready and has new data
-        if (videoReady && video.readyState >= video.HAVE_CURRENT_DATA) {
+        if (videoReady && video.readyState >= video.HAVE_CURRENT_DATA) { // HAVE_CURRENT_DATA = 2
           gl.bindTexture(gl.TEXTURE_2D, texture);
           gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
           gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
-          // Set filtering parameters (needed each time for video? Maybe not, but safe)
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          // No need to set parameters repeatedly for video texture
         }
 
         // Set viewport and clear
@@ -203,48 +273,58 @@
         // Keep the loop going
         requestAnimationFrame(render);
       }
-    }
 
-    // --- WebGL Helper Functions ---
-    function createShader(gl, type, source) {
-      const shader = gl.createShader(type);
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        return shader;
+      // --- WebGL Helper Functions ---
+      function createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          return shader;
+        }
+        console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
       }
-      console.error('Shader compile error:', gl.getShaderInfoLog(shader));
-      gl.deleteShader(shader);
-      return null;
-    }
 
-    function createProgram(gl, vsSource, fsSource) {
-      const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
-      const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
-      if (!vertexShader || !fragmentShader) return null;
+      function createProgram(gl, vsSource, fsSource) {
+        const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+        if (!vertexShader || !fragmentShader) return null;
 
-      const program = gl.createProgram();
-      gl.attachShader(program, vertexShader);
-      gl.attachShader(program, fragmentShader);
-      gl.linkProgram(program);
-      if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        return program;
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+          return program;
+        }
+        console.error('Program link error:', gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+        return null;
       }
-      console.error('Program link error:', gl.getProgramInfoLog(program));
-      gl.deleteProgram(program);
-      return null;
-    }
 
-    function createTexture(gl) {
-      const texture = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      // Put a single pixel until video loads
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255])); // Black pixel
-      return texture;
-    }
+      function createTexture(gl) {
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        // Put a single pixel until video loads
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255])); // Black pixel
+        // Set texture parameters once
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        return texture;
+      }
+
+      console.log("main() setup complete. Initializing video load."); // <-- Add log
+      // video.load(); // Explicitly trigger load for the initial source in HTML
+    } // End of main function
 
     // Start the WebGL application
-    main();
+    console.log("Calling main()..."); // <-- Add log
+    main(); // Call main to set everything up
+    console.log("main() finished."); // <-- Add log
   </script>
 
 </body>
