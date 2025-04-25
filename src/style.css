@@ -93,7 +93,7 @@ h1 {
       font-weight: 700;
       opacity: 0;
       animation: glitch2 1s infinite;
-      
+
       &.visible {
         opacity: 1;
       }
@@ -150,6 +150,19 @@ h1 {
         background-color: hotpink;
       }
 
+    }
+
+    & .tv-case .knob-spot {
+      background: rgba(255, 0, 255, 0) url(i/knob-spot.png) no-repeat center center;
+      position: absolute;
+      top: 62.8%;
+      left: 79%;
+      width: 12.83%;
+      height: 18.18%;
+      z-index: 1;
+      transform-origin: center center;
+      transform: rotate(90deg);
+      clip-path: circle(50% at 50% 50%);
     }
 
     & .tv-screen {

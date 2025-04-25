@@ -1,5 +1,5 @@
 export function generateVCRNoise(canvas: HTMLCanvasElement) {
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
 
     const fps = 61;
     let vcrInterval: any = null;
@@ -19,7 +19,7 @@ export function generateVCRNoise(canvas: HTMLCanvasElement) {
             clearInterval(vcrInterval);
         }
         vcrInterval = setInterval(() => {
-            renderTrackingNoise();
+            renderTrackingNoise(canvas, ctx);
         }, 1000 / fps);
     }
 }
@@ -62,7 +62,7 @@ function renderTail(ctx: CanvasRenderingContext2D, x: number, y: number, radius:
     // let rd = radius;
     const dir = dirs[Math.floor(Math.random() * dirs.length)];
     for (let i = 0; i < n; i++) {
-        const step = 0.01;
+        // const step = 0.01;
         // let r = getRandomInt((rd -= step), radius);
         let r = 1;
         let dx = getRandomInt(1, 4);
