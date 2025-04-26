@@ -29,11 +29,25 @@ export function generateVCRNoise(canvas: HTMLCanvasElement) {
 
 function renderTrackingNoise(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, intensity: number) {
     const radius = 1;
-    let posy1 = 100;
+    // Calculate posy1 and number of particles based on intensity
+    let posy1: number;
+    let num: number;
+
+    if (intensity <= 0.5) {
+        // Linear interpolation between (0, 105) and (0.5, 100)
+        posy1 = -10 * intensity + 105;
+        num = 18 * intensity + 1;
+    } else {
+        // Linear interpolation between (0.5, 100) and (1, 10)
+        posy1 = -180 * (intensity - 0.5) + 100;
+        num = 180 * (intensity - 0.5) + 10;
+    }
+    // Clamp posy1 to a reasonable minimum (e.g., 1) and round
+    posy1 = Math.max(1, Math.round(posy1));
+    num = Math.round(num); // Round to the nearest integer
+
     let posy2 = canvas!.height - 10;
     let posy3 = 1;
-    const maxParticles = 10; // Maximum number of particles at full intensity
-    const num = Math.round(maxParticles * intensity);
 
     const xmax = canvas!.width;
 
@@ -41,7 +55,7 @@ function renderTrackingNoise(canvas: HTMLCanvasElement, ctx: CanvasRenderingCont
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (ctx && num > 0) { // Only draw if num > 0
-        // canvas!.style.filter = `blur(${intensity * 1}px)`; // Optional: adjust blur based on intensity
+        canvas!.style.filter = `blur(${intensity * 1}px)`; // Optional: adjust blur based on intensity
         ctx.fillStyle = `#fff`;
         // ctx.globalAlpha = intensity * 0.75; // Optional: Adjust global alpha
 

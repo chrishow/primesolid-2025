@@ -261,7 +261,7 @@ export class TV {
 
         // --- VCR Noise Intensity ---
         // Use the normalized angle directly for linear intensity scaling
-        const noiseIntensity = normalizedAngle; // Removed quadratic curve
+        const noiseIntensity = normalizedAngle;
         setVCRNoiseIntensity(noiseIntensity);
 
         // --- Glitch Frequency ---
@@ -301,7 +301,7 @@ export class TV {
         const glitchClass = `is-glitching-${glitchType}`;
 
         this.movieElement.classList.add(glitchClass);
-        console.log(`Glitch effect triggered: ${glitchClass}`);
+        // console.log(`Glitch effect triggered: ${glitchClass}`);
 
         // Animation duration (should be consistent for both animations)
         const animationDuration = 300;
