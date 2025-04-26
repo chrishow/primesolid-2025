@@ -1,42 +1,49 @@
+let currentIntensity = 0.5; // Default intensity (0 to 1)
+let animationFrameId: number | null = null; // Store animation frame ID
+
+// Exported function to update the intensity
+export function setVCRNoiseIntensity(intensity: number) {
+    currentIntensity = Math.max(0, Math.min(1, intensity)); // Clamp between 0 and 1
+}
+
 export function generateVCRNoise(canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext('2d')!;
 
-    const fps = 61;
-    let vcrInterval: any = null;
-
-    if (fps >= 60) {
-        if (vcrInterval) {
-            cancelAnimationFrame(vcrInterval);
-        }
-        const animate = () => {
-            renderTrackingNoise(canvas, ctx);
-            vcrInterval = requestAnimationFrame(animate);
-        };
-
-        animate();
-    } else {
-        if (vcrInterval) {
-            clearInterval(vcrInterval);
-        }
-        vcrInterval = setInterval(() => {
-            renderTrackingNoise(canvas, ctx);
-        }, 1000 / fps);
+    // Stop any previous animation loop
+    if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
     }
+
+    const animate = () => {
+        if (currentIntensity > 0) { // Only render if intensity is > 0
+            renderTrackingNoise(canvas, ctx, currentIntensity);
+        } else {
+            // Clear canvas if intensity is 0
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animate(); // Start the animation loop
 }
 
-function renderTrackingNoise(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+function renderTrackingNoise(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, intensity: number) {
     const radius = 1;
     let posy1 = 100;
     let posy2 = canvas!.height - 10;
     let posy3 = 1;
-    const num = 4;
+    const maxParticles = 10; // Maximum number of particles at full intensity
+    const num = Math.round(maxParticles * intensity);
 
     const xmax = canvas!.width;
 
-    if (ctx) {
-        canvas!.style.filter = `blur(1px)`;
-        ctx.clearRect(0, 0, canvas!.width, canvas!.height);
+    // Always clear the canvas before drawing (or if not drawing)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (ctx && num > 0) { // Only draw if num > 0
+        // canvas!.style.filter = `blur(${intensity * 1}px)`; // Optional: adjust blur based on intensity
         ctx.fillStyle = `#fff`;
+        // ctx.globalAlpha = intensity * 0.75; // Optional: Adjust global alpha
 
         ctx.beginPath();
         for (var i = 0; i <= num; i++) {

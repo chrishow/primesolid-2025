@@ -1,4 +1,4 @@
-import { generateVCRNoise } from './vcrNoise';
+import { generateVCRNoise, setVCRNoiseIntensity } from './vcrNoise';
 
 // Define the structure of a channel object
 interface Channel {
@@ -22,28 +22,43 @@ export class TV {
     private tvElement: HTMLElement;
     private videoElement: HTMLVideoElement;
     private noiseCanvas: HTMLCanvasElement;
+    private movieElement: HTMLElement; // Added to store the movie element
     private currentChannel: number = 1;
     private buttons: NodeListOf<HTMLButtonElement>;
     private channelDisplay: HTMLElement;
     private channels: Map<number, Channel> = new Map(); // Changed value type to Channel
     private clickSound: HTMLAudioElement;
     private channelDisplayTimeout: ReturnType<typeof setTimeout> | null = null;
+    private glitchTimeout: ReturnType<typeof setTimeout> | null = null; // Added for glitch control
+    private isGlitching: boolean = false; // Track if glitch animation is active
+
+    // Knob related properties
+    private knobElement: HTMLElement;
+    private isDraggingKnob: boolean = false;
+    private knobPreviousDragAngle: number = 0; // Angle during the previous move event
+    private knobCurrentAngle: number = 0; // Current rotation angle of the knob
+    private minKnobAngle: number = -90; // Minimum rotation angle
+    private maxKnobAngle: number = 90;  // Maximum rotation angle (180 degree range)
 
     constructor() {
         this.tvElement = document.querySelector('.tv') as HTMLElement;
         this.videoElement = this.tvElement.querySelector('video') as HTMLVideoElement;
         this.noiseCanvas = this.tvElement.querySelector('.noise-canvas') as HTMLCanvasElement;
+        this.movieElement = this.tvElement.querySelector('.movie') as HTMLElement; // Get the movie element
         this.buttons = this.tvElement.querySelectorAll('.tv-case button') as NodeListOf<HTMLButtonElement>;
         this.channelDisplay = this.tvElement.querySelector('.channel-display') as HTMLElement;
+        this.knobElement = this.tvElement.querySelector('.knob-spot') as HTMLElement; // Get the knob element
 
         this.clickSound = new Audio('src/i/click.mp3');
         this.clickSound.preload = 'auto'; // Hint to the browser to load it
         this.clickSound.volume = 0.6; // Set volume to 50%
 
         this.setupChannels();
+        this.setupKnob(); // Add this line to setup the knob
         this.changeChannel(this.currentChannel); // Load initial channel video
 
         generateVCRNoise(this.noiseCanvas);
+        this.updateEffectsBasedOnKnob(); // Initial effect settings based on default knob position
     }
 
     private playClickSound() {
@@ -54,6 +69,116 @@ export class TV {
             console.error("Error playing click sound:", error);
         });
     }
+
+    private setupKnob() {
+        // Set initial rotation back to the middle of the range (0 degrees)
+        this.knobCurrentAngle = (this.minKnobAngle + this.maxKnobAngle) / 2; // Reverted to midpoint
+        this.knobElement.style.transform = `rotate(${this.knobCurrentAngle}deg)`; // Initialize rotation
+
+        this.knobElement.addEventListener('mousedown', this.knobMouseDown.bind(this));
+        // Add touch events for mobile compatibility
+        this.knobElement.addEventListener('touchstart', (e) => this.knobMouseDown(e as any), { passive: false });
+
+        // Add mousemove and mouseup listeners to the document to handle dragging outside the knob
+        document.addEventListener('mousemove', this.knobMouseMove.bind(this));
+        document.addEventListener('mouseup', this.knobMouseUp.bind(this));
+        // Add touchmove and touchend listeners
+        document.addEventListener('touchmove', (e) => this.knobMouseMove(e as any), { passive: false });
+        document.addEventListener('touchend', this.knobMouseUp.bind(this));
+    }
+
+    private getAngle(event: MouseEvent | TouchEvent): number {
+        const knobRect = this.knobElement.getBoundingClientRect();
+        const centerX = knobRect.left + knobRect.width / 2;
+        const centerY = knobRect.top + knobRect.height / 2;
+
+        let clientX, clientY;
+        if (event instanceof MouseEvent) {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        } else { // TouchEvent
+            // Use the first touch point
+            if (event.touches.length === 0) return this.knobCurrentAngle; // No touches, return current angle
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+        }
+
+
+        const deltaX = clientX - centerX;
+        const deltaY = clientY - centerY;
+        // Calculate angle in degrees (atan2 returns radians)
+        let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+        // Adjust angle to be 0-360 degrees (optional, depends on desired behavior)
+        // angle = (angle + 360) % 360;
+        return angle;
+    }
+
+
+    private knobMouseDown(event: MouseEvent | TouchEvent) {
+        // Prevent default drag behavior (e.g., image dragging)
+        if (event instanceof MouseEvent) {
+            event.preventDefault();
+        } else { // TouchEvent
+            // Prevent scrolling while dragging the knob
+            event.preventDefault();
+        }
+
+        this.isDraggingKnob = true;
+        // Store the angle at the start of the drag
+        this.knobPreviousDragAngle = this.getAngle(event);
+        // Calculate the offset between the initial click angle and the current knob angle
+        // this.knobStartAngle = this.knobPreviousDragAngle - this.knobCurrentAngle; // Removed unused variable assignment
+        this.knobElement.classList.add('dragging'); // Optional: Add class for styling
+    }
+
+    private knobMouseMove(event: MouseEvent | TouchEvent) {
+        if (!this.isDraggingKnob) return;
+
+        if (event instanceof TouchEvent) {
+            event.preventDefault();
+        }
+
+        const currentDragAngle = this.getAngle(event);
+        let deltaAngle = currentDragAngle - this.knobPreviousDragAngle;
+
+        // Handle angle wrap-around (-180 to 180 degrees)
+        if (deltaAngle > 180) {
+            deltaAngle -= 360;
+        } else if (deltaAngle < -180) {
+            deltaAngle += 360;
+        }
+
+        // Update the knob's current angle by the change
+        let newAngle = this.knobCurrentAngle + deltaAngle;
+
+        // Clamp the angle to the defined range
+        newAngle = Math.max(this.minKnobAngle, Math.min(this.maxKnobAngle, newAngle));
+
+        // Update the current angle and the previous angle for the next move
+        this.knobCurrentAngle = newAngle;
+        this.knobPreviousDragAngle = currentDragAngle;
+
+        this.knobElement.style.transform = `rotate(${this.knobCurrentAngle}deg)`;
+
+        // Update effects based on the new knob angle
+        this.updateEffectsBasedOnKnob();
+
+        // Dispatch a custom event with the current angle
+        const rotateEvent = new CustomEvent('knob-rotate', {
+            detail: { angle: this.knobCurrentAngle },
+            bubbles: true,
+            cancelable: true
+        });
+        this.knobElement.dispatchEvent(rotateEvent);
+    }
+
+    private knobMouseUp() {
+        if (!this.isDraggingKnob) return;
+        this.isDraggingKnob = false;
+        this.knobElement.classList.remove('dragging'); // Optional: Remove styling class
+        // You might want to snap to specific values or perform final actions here
+    }
+
 
     private changeChannel(channelNumber: number) {
         const channelData = this.channels.get(channelNumber);
@@ -127,5 +252,66 @@ export class TV {
         } else {
             console.warn("window.channels is not defined or not an array.");
         }
+    }
+
+    private updateEffectsBasedOnKnob() {
+        // Map knob angle (-90 to 90) to intensity (0 to 1)
+        const totalRange = this.maxKnobAngle - this.minKnobAngle;
+        const normalizedAngle = (this.knobCurrentAngle - this.minKnobAngle) / totalRange;
+
+        // --- VCR Noise Intensity ---
+        // Use the normalized angle directly for linear intensity scaling
+        const noiseIntensity = normalizedAngle; // Removed quadratic curve
+        setVCRNoiseIntensity(noiseIntensity);
+
+        // --- Glitch Frequency ---
+        // Map intensity (0-1) to delay (e.g., 10s to 0.5s)
+        const minGlitchDelay = 200; // ms (frequent glitch)
+        const maxGlitchDelay = 5000; // ms (infrequent glitch)
+        const glitchDelayRange = maxGlitchDelay - minGlitchDelay;
+        // Invert intensity so 0 intensity = max delay, 1 intensity = min delay
+        const currentGlitchDelay = maxGlitchDelay - (normalizedAngle * glitchDelayRange);
+
+        // Clear existing glitch timeout
+        if (this.glitchTimeout) {
+            clearTimeout(this.glitchTimeout);
+            this.glitchTimeout = null;
+        }
+
+        // Schedule the next glitch if intensity > 0 and not already glitching
+        if (normalizedAngle > 0.01 && !this.isGlitching) { // Add a small threshold
+            this.glitchTimeout = setTimeout(() => {
+                this.triggerGlitch();
+            }, currentGlitchDelay);
+        } else if (normalizedAngle <= 0.01) {
+            // If intensity is zero, ensure glitch class is removed
+            this.movieElement.classList.remove('is-glitching-1'); // Remove both possible classes
+            this.movieElement.classList.remove('is-glitching-2');
+            this.isGlitching = false;
+        }
+    }
+
+    private triggerGlitch() {
+        if (this.isGlitching) return; // Don't trigger if already running
+
+        this.isGlitching = true;
+
+        // Randomly choose glitch type (1 or 2)
+        const glitchType = Math.random() < 0.5 ? 1 : 2;
+        const glitchClass = `is-glitching-${glitchType}`;
+
+        this.movieElement.classList.add(glitchClass);
+        console.log(`Glitch effect triggered: ${glitchClass}`);
+
+        // Animation duration (should be consistent for both animations)
+        const animationDuration = 300;
+
+        // Use setTimeout to remove the class after the animation completes
+        setTimeout(() => {
+            this.movieElement.classList.remove(glitchClass); // Remove the specific class that was added
+            this.isGlitching = false;
+            // Schedule the next glitch after the current one finishes
+            this.updateEffectsBasedOnKnob();
+        }, animationDuration);
     }
 }

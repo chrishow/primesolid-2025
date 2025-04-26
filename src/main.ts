@@ -3,7 +3,6 @@ import { setupFog } from './fog';
 import { initializeGlitchEffect } from './glitchEffect';
 import { TV } from './tv';
 
-
 const canvas = document.getElementById('glslCanvas') as HTMLCanvasElement | null;
 
 if (canvas) {
@@ -15,3 +14,4 @@ if (canvas) {
 initializeGlitchEffect('.content >  *:not(div)');
 
 new TV();
+

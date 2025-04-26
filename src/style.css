@@ -42,6 +42,24 @@ canvas.visible {
   opacity: 1;
 }
 
+.knob-spot {
+  background: rgba(255, 0, 255, 0.0) url(i/knob-spot.png) no-repeat center center;
+  background-size: cover;
+  position: absolute;
+  display: block;
+  z-index: 1;
+  top: 62.8%;
+  left: 79%;
+  width: 12.83%;
+  height: 18.18%;
+  pointer-events: all;
+
+  transform-origin: center center;
+  transform: rotate(0deg);
+  border-radius: 100%;
+  cursor: pointer;
+}
+
 .content {
   --content-padding: 2em;
   padding-top: 3em;
@@ -111,11 +129,16 @@ h1 {
       background-size: cover;
     }
 
+    & .tv-case {
+      pointer-events: none;
+    }
+
     & .tv-case button {
       position: absolute;
       appearance: none;
       border: none;
       cursor: pointer;
+      pointer-events: all;
 
       opacity: 0;
 
@@ -135,7 +158,7 @@ h1 {
       cursor: pointer;
 
       &[data-channel="2"] {
-        left: 86.4%;
+        left: 86.2%;
         background-color: hotpink;
       }
 
@@ -146,24 +169,12 @@ h1 {
 
       &[data-channel="4"] {
         top: 24.3%;
-        left: 86.4%;
+        left: 86.2%;
         background-color: hotpink;
       }
 
     }
 
-    & .tv-case .knob-spot {
-      background: rgba(255, 0, 255, 0) url(i/knob-spot.png) no-repeat center center;
-      position: absolute;
-      top: 62.8%;
-      left: 79%;
-      width: 12.83%;
-      height: 18.18%;
-      z-index: 1;
-      transform-origin: center center;
-      transform: rotate(90deg);
-      clip-path: circle(50% at 50% 50%);
-    }
 
     & .tv-screen {
       background: transparent url(i/tv-screen.png) no-repeat center center;
@@ -189,6 +200,7 @@ h1 {
         width: 100%;
         height: 100%;
         filter: blur(0.5px);
+        cursor: pointer;
       }
 
       & .scanlines {
@@ -212,7 +224,7 @@ h1 {
         pointer-events: none;
         background-color: transparent;
         z-index: 2;
-        opacity: 0.75;
+        opacity: 0.9;
       }
     
     }
@@ -232,8 +244,13 @@ h1 {
     animation: wobbly 100ms infinite;    
   }
 
-  .glitch {
-    animation: 5s ease 20ms normal none infinite running glitch;
+  /* Apply animation only when .is-glitching-* is added */
+  .glitch-effect.is-glitching-1 {
+    animation: glitch 0.3s ease 0s 1 normal none running;
+  }
+
+  .glitch-effect.is-glitching-2 {
+    animation: glitch-alt 0.3s ease 0s 1 normal none running;
   }
 
   .tube-frame {
@@ -260,29 +277,57 @@ h1 {
 }
 
 @keyframes glitch {
-	30% {
-	}
-	40% {
+	0% {
 		opacity: 1;
-		transform: scale(1, 1);
-		transform: skew(0, 0);
+		transform: scale(1, 1) skew(0, 0);
 	}
-	41% {
-		opacity: 0.8;
-		transform: scale(1, 1.2);
-		transform: skew(80deg, 0);
-	}
-	42% {
-		opacity: 0.8;
-		transform: scale(1, 1.2);
-		transform: skew(-50deg, 0);
-	}
-	43% {
+	80% {
 		opacity: 1;
-		transform: scale(1, 1);
-		transform: skew(0, 0);
+		transform: scale(1, 1) skew(0, 0);
 	}
-	65% {
+	82% {
+		opacity: 0.8;
+		transform: scale(1, 1.2) skew(80deg, 0);
+	}
+	84% {
+		opacity: 0.8;
+		transform: scale(1, 1.2) skew(-50deg, 0);
+	}
+	86% {
+		opacity: 1;
+		transform: scale(1, 1) skew(0, 0);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1, 1) skew(0, 0);
+	}
+}
+
+/* New alternative glitch animation */
+@keyframes glitch-alt {
+	0% {
+		opacity: 1;
+		transform: scale(1, 1) skew(0, 0);
+	}
+	75% { /* Start glitch effect slightly earlier */
+		opacity: 1;
+		transform: scale(1, 1) skew(0, 0);
+	}
+	77% { /* Different skew/scale values */
+		opacity: 0.7;
+		transform: scale(1.1, 0.9) skew(0, -70deg);
+	}
+	79% {
+		opacity: 0.7;
+		transform: scale(0.9, 1.1) skew(0, 30deg);
+	}
+	81% {
+		opacity: 1;
+		transform: scale(1, 1) skew(0, 0);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1, 1) skew(0, 0);
 	}
 }
 
