@@ -1,8 +1,23 @@
 ## Notes
 
 
+CREDITS 
+
 Wobble and scanlines from here:
 https://codepen.io/Mobius1/pen/ZNgwbr
+
+Render HTML to WebGL canvas technique from here:
+https://html-to-webgl-demo-nikoloffgeorgi.vercel.app/
+
+My codepen here:
+https://codepen.io/chrishow/pen/YPPxWMj
+
+CRT Noise from here:
+https://codepen.io/Mobius1/pen/ZNgwbr
+
+
+
+TOOLS
 
 Cut videos with this:
 https://online-video-cutter.com/
@@ -10,8 +25,3 @@ https://online-video-cutter.com/
 Background remover:
 https://www.photoroom.com/tools/background-remover
 
-
-You need to re-record the crush (and wayve) video without the frame. 
-
-The frame is going to be super-imposed on the top in its final place. 
-We don't want wobble on the frame, just on the video inside!
