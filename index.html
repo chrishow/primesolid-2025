@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chris How</title>
-    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="src/style.css" />
     <script>
       window.channels = [
         {
@@ -59,7 +59,7 @@
       <div class="projects">
         <div class="tv">
           <div>
-            <div class="channel-display">0</div>
+            <canvas class="channel-display-canvas"></canvas>
             <div class="movie wobbly glitch-effect">
               <video autoplay loop muted playsinline></video>
               <div class="scanlines"></div>
@@ -67,13 +67,13 @@
             </div>
           </div>
           <div class="tv-case">
-            <button class="down" data-channel="1"></button>
+            <button data-channel="1" class="down"></button>
             <button data-channel="2"></button>
             <button data-channel="3"></button>
             <button data-channel="4"></button>
-            <div class="knob-spot"></div>
-              
           </div>
+          <div class="knob-spot"></div>
+          <!-- Original div is now hidden -->
           <div class="tv-screen"></div>
           <div class="back-mask"></div>
   
@@ -154,23 +154,6 @@
         color of the fog based on the distance from the camera. The fog density
         can be adjusted to create a more or less dense fog effect.
       </p>
-
-      <p>
-        This is a simple fog effect using WebGL and GLSL. The fog is created by
-        blending the color of the fog with the color of the object based on the
-        distance from the camera.
-      </p>
-      <p>
-        The fog color and density can be adjusted in the shader code. The
-        distance from the camera to the object is calculated in the fragment
-        shader, and the fog effect is applied based on this distance.
-      </p>
-      <p>
-        The fog effect is created by blending the color of the object with the
-        color of the fog based on the distance from the camera. The fog density
-        can be adjusted to create a more or less dense fog effect.
-      </p>
-
 
       <p>
         This is a simple fog effect using WebGL and GLSL. The fog is created by

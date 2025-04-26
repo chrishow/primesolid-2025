@@ -13,7 +13,6 @@
 html {
   box-sizing: border-box;
 }
-
 *, *:before, *:after {
   box-sizing: inherit;
 }
@@ -25,7 +24,7 @@ body {
   font-family: 'Share Tech Mono', monospace;
 }
 
-canvas { 
+canvas#glslCanvas { 
   position: fixed;
   top: 0;
   left: 0;
@@ -36,11 +35,13 @@ canvas {
   height: 100%;
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
+
+  &.visible {
+    opacity: 1;
+  }
 }
 
-canvas.visible {
-  opacity: 1;
-}
+
 
 .knob-spot {
   background: rgba(255, 0, 255, 0.0) url(i/knob-spot.png) no-repeat center center;
@@ -101,16 +102,18 @@ h1 {
     height: auto;
     aspect-ratio: 889/627;
 
-    & .channel-display {
+    & .channel-display-canvas {
       position: absolute;
-      top: 15%;
-      left: 14%;
+      background-color: transparent;
+      top: 12%;
+      left: 8%;
+      width: 60%;
+      height: 63%;
       z-index: 1;
-      color: lime;
-      font-size: 2em;
-      font-weight: 700;
-      opacity: 0;
+      pointer-events: none;
+      opacity: 0; /* Start hidden */
       animation: glitch2 1s infinite;
+      transition: opacity 0;
 
       &.visible {
         opacity: 1;
@@ -339,7 +342,7 @@ h1 {
 		transform: translateX(0);
 	}
 	31% {
-		transform: translateX(-10px);
+		transform: translateX(-5px);
 	}
 	32% {
 		transform: translateX(0);
@@ -348,7 +351,7 @@ h1 {
 		transform: translateX(0);
 	}
 	100% {
-		transform: translateX(-10px);
+		transform: translateX(-8px);
 	}
 }
 

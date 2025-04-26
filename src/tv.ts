@@ -1,4 +1,5 @@
 import { generateVCRNoise, setVCRNoiseIntensity } from './vcrNoise';
+import { ChannelDisplayEffect } from './channelDisplayEffect'; // Import the new class
 
 // Define the structure of a channel object
 interface Channel {
@@ -25,7 +26,9 @@ export class TV {
     private movieElement: HTMLElement; // Added to store the movie element
     private currentChannel: number = 1;
     private buttons: NodeListOf<HTMLButtonElement>;
-    private channelDisplay: HTMLElement;
+    private channelDisplay: HTMLElement; // Keep reference to original (now hidden) div if needed, or remove
+    private channelDisplayCanvas: HTMLCanvasElement; // Reference to the new canvas
+    private channelDisplayEffect: ChannelDisplayEffect; // Instance of the effect class
     private channels: Map<number, Channel> = new Map(); // Changed value type to Channel
     private clickSound: HTMLAudioElement;
     private channelDisplayTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -44,10 +47,14 @@ export class TV {
         this.tvElement = document.querySelector('.tv') as HTMLElement;
         this.videoElement = this.tvElement.querySelector('video') as HTMLVideoElement;
         this.noiseCanvas = this.tvElement.querySelector('.noise-canvas') as HTMLCanvasElement;
-        this.movieElement = this.tvElement.querySelector('.movie') as HTMLElement; // Get the movie element
+        this.movieElement = this.tvElement.querySelector('.movie') as HTMLElement;
         this.buttons = this.tvElement.querySelectorAll('.tv-case button') as NodeListOf<HTMLButtonElement>;
-        this.channelDisplay = this.tvElement.querySelector('.channel-display') as HTMLElement;
-        this.knobElement = this.tvElement.querySelector('.knob-spot') as HTMLElement; // Get the knob element
+        this.channelDisplay = this.tvElement.querySelector('.channel-display') as HTMLElement; // Original div
+        this.channelDisplayCanvas = this.tvElement.querySelector('.channel-display-canvas') as HTMLCanvasElement; // New canvas
+        this.knobElement = this.tvElement.querySelector('.knob-spot') as HTMLElement;
+
+        // Instantiate the effect controller
+        this.channelDisplayEffect = new ChannelDisplayEffect(this.channelDisplayCanvas);
 
         this.clickSound = new Audio('src/i/click.mp3');
         this.clickSound.preload = 'auto'; // Hint to the browser to load it
@@ -201,18 +208,25 @@ export class TV {
             console.warn(`Channel ${channelNumber} data or video source not found.`);
             this.videoElement.src = ''; // Clear the video source or show static/default image
         }
-        this.channelDisplay.textContent = channelData?.name || '-';
-        this.channelDisplay.classList.add('visible');
+
+        // Use the new effect class to display the text
+        const channelName = channelData?.name || '-';
+        this.channelDisplayEffect.setText(channelName);
+        this.channelDisplayEffect.show();
+        // Remove direct manipulation of the old div's visibility/text
+        // this.channelDisplay.textContent = channelData?.name || '-';
+        // this.channelDisplay.classList.add('visible');
 
         this.currentChannel = channelNumber;
-
 
         if (this.channelDisplayTimeout) {
             clearTimeout(this.channelDisplayTimeout); // Clear any existing timeout
         }
 
+        // Use the effect class to hide after delay
         this.channelDisplayTimeout = setTimeout(() => {
-            this.channelDisplay.classList.remove('visible');
+            this.channelDisplayEffect.hide();
+            // this.channelDisplay.classList.remove('visible');
         }, 3000); // Remove after delay
     }
 
