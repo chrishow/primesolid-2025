@@ -207,7 +207,10 @@ h1 {
       }
 
       & .teletext-html-content {
-        display: none; 
+        /* display: none;  */
+        position: relative;
+        z-index: 2;
+        opacity: 0;
       }
 
       & .teletext-canvas { 

@@ -26,7 +26,7 @@ export class TV {
     private noiseCanvas: HTMLCanvasElement;
     private movieElement: HTMLElement;
     private teletextCanvas: HTMLCanvasElement; // Reference to the new teletext canvas
-    private currentChannel: number = 1;
+    private currentChannel: number = 4;
     private buttons: NodeListOf<HTMLButtonElement>;
     private channelDisplayCanvas: HTMLCanvasElement; // Reference to the new canvas
     private channelDisplayEffect: ChannelDisplayEffect; // Instance of the effect class
@@ -291,7 +291,7 @@ export class TV {
                     console.warn('Skipping channel due to missing number:', channel);
                 }
             });
-            console.log('Available channels loaded from window.channels:', this.channels);
+            // console.log('Available channels loaded from window.channels:', this.channels);
         } else {
             console.warn("window.channels is not defined or not an array.");
         }

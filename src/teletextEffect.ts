@@ -12,13 +12,15 @@ export class TeletextEffect {
     private textureLocation: WebGLUniformLocation | null;
     private curvatureLocation: WebGLUniformLocation | null;
 
-    // HTML rendering related properties
+    // HTML/SVG rendering related properties
     private htmlContentElement: HTMLElement;
     private htmlCanvas: HTMLCanvasElement;
     private htmlCtx: CanvasRenderingContext2D;
+    private svgImage: HTMLImageElement; // Re-add Image element for SVG loading
 
     private isVisible: boolean = false;
-    private textureNeedsUpdate: boolean = true; // Flag to update texture on show
+    private textureNeedsUpdate: boolean = true;
+    private isContentLoaded: boolean = false;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
@@ -37,16 +39,22 @@ export class TeletextEffect {
             throw new Error('Required HTML content element .teletext-html-content not found');
         }
 
-        // Create offscreen canvas for rendering HTML content
+        // Create offscreen canvas for rendering the SVG image
         this.htmlCanvas = document.createElement('canvas');
-        // Use dimensions from the HTML content element or set fixed size
-        this.htmlCanvas.width = this.htmlContentElement.offsetWidth || 500;
-        this.htmlCanvas.height = this.htmlContentElement.offsetHeight || 400;
+        // Use dimensions from the HTML content element's style or defaults
+        this.htmlCanvas.width = parseInt(this.htmlContentElement.style.width) || 500;
+        this.htmlCanvas.height = parseInt(this.htmlContentElement.style.height) || 400;
         const htmlCtx = this.htmlCanvas.getContext('2d');
         if (!htmlCtx) {
             throw new Error('Could not get 2D context for HTML rendering');
         }
         this.htmlCtx = htmlCtx;
+
+        // Re-add Image element to load the SVG data URI
+        this.svgImage = new Image();
+
+        // Load external HTML content
+        this.loadHtmlContent('/teletext.html');
 
         this.program = this.createProgram(vertexShaderSource, fragmentShaderSource);
         this.gl.useProgram(this.program);
@@ -69,6 +77,37 @@ export class TeletextEffect {
         this.texture = this.createTexture();
         this.gl.uniform1i(this.textureLocation, 0);
         this.resize();
+    }
+
+    private async loadHtmlContent(url: string): Promise<void> {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const html = await response.text();
+            this.htmlContentElement.innerHTML = html;
+            this.isContentLoaded = true;
+            // If the effect is already visible when content loads, update the texture
+            if (this.isVisible) {
+                this.textureNeedsUpdate = true; // Mark for update
+                this.updateTexture();
+            } else {
+                // Otherwise, just mark that it needs update when shown
+                this.textureNeedsUpdate = true;
+            }
+        } catch (error) {
+            console.error("Failed to load teletext HTML content:", error);
+            // Optionally display an error message in the teletext div
+            this.htmlContentElement.innerHTML = '<p style="color: red;">Error loading content.</p>';
+            this.isContentLoaded = true; // Mark as loaded (with error) to prevent infinite retries
+            if (this.isVisible) {
+                this.textureNeedsUpdate = true;
+                this.updateTexture();
+            } else {
+                this.textureNeedsUpdate = true;
+            }
+        }
     }
 
     private createShader(type: number, source: string): WebGLShader {
@@ -113,61 +152,66 @@ export class TeletextEffect {
     }
 
     private updateTexture() {
-        const ctx = this.htmlCtx;
-        const canvasWidth = this.htmlCanvas.width;
-        const canvasHeight = this.htmlCanvas.height;
+        // Only proceed if content is loaded
+        if (!this.isContentLoaded) return;
 
-        // 1. Get computed styles from the HTML element for accuracy
-        const style = window.getComputedStyle(this.htmlContentElement);
-        const bgColor = style.backgroundColor || '#000020';
-        const textColor = style.color || 'lime';
-        const fontFamily = style.fontFamily || '"Share Tech Mono", monospace';
-        const fontSize = style.fontSize || '16px';
-        const lineHeight = parseInt(style.lineHeight) || (parseInt(fontSize) * 1.2);
-        const padding = parseInt(style.paddingTop) || 10;
+        const htmlString = this.htmlContentElement.innerHTML;
+        const svgWidth = this.htmlCanvas.width;
+        const svgHeight = this.htmlCanvas.height;
 
-        // 2. Draw background
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        // 1. Create SVG string with foreignObject containing the HTML
+        // Ensure styles from the container are included or applied within the SVG/HTML
+        const data = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">
+                        <foreignObject width="100%" height="100%">
+                          <div xmlns="http://www.w3.org/1999/xhtml" style="width: ${svgWidth}px; height: ${svgHeight}px; background-color: #000020; color: lime; font-family: 'Share Tech Mono', monospace; font-size: 16px; padding: 10px; box-sizing: border-box;">
+                            ${htmlString}
+                          </div>
+                        </foreignObject>
+                      </svg>`;
 
-        // 3. Prepare text styling
-        ctx.fillStyle = textColor;
-        ctx.font = `${fontSize} ${fontFamily}`;
-        ctx.textBaseline = 'top';
+        // 2. Create base64 data URI from SVG string
+        // Use btoa for base64 encoding
+        const svgBase64 = btoa(unescape(encodeURIComponent(data)));
+        const url = `data:image/svg+xml;base64,${svgBase64}`;
 
-        // 4. Draw text lines (simple example: assumes <p> tags)
-        let yPos = padding;
-        const paragraphs = this.htmlContentElement.querySelectorAll('p');
-        paragraphs.forEach(p => {
-            // Basic text wrapping (adjust as needed)
-            const text = p.textContent || '';
-            // A more robust solution might measure text width and break lines
-            ctx.fillText(text, padding, yPos);
-            yPos += lineHeight;
-        });
+        // 3. Load SVG data URI into the Image element
+        this.svgImage.onload = () => {
+            // 4. Draw Image onto 2D canvas
+            this.htmlCtx.clearRect(0, 0, this.htmlCanvas.width, this.htmlCanvas.height);
+            this.htmlCtx.drawImage(this.svgImage, 0, 0, this.htmlCanvas.width, this.htmlCanvas.height);
 
-        // 5. Upload 2D canvas to WebGL texture
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true); // Flip Y for WebGL
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.htmlCanvas);
-        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, false);
+            // 5. Upload 2D canvas to WebGL texture
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+            this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true); // Flip Y for WebGL
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.htmlCanvas);
+            this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, false);
 
-        this.textureNeedsUpdate = false; // Mark texture as updated
-        if (this.isVisible) {
-            this.render(); // Re-render if visible
-        }
+            this.textureNeedsUpdate = false; // Mark texture as updated
+            if (this.isVisible) {
+                this.render(); // Re-render if visible
+            }
+        };
+        this.svgImage.onerror = (err) => {
+            console.error("Error loading SVG data URI:", err);
+            // Handle error - maybe try the direct canvas drawing as a fallback?
+        };
+        this.svgImage.src = url;
     }
+
 
     public show() {
         if (!this.isVisible) {
             this.isVisible = true;
             this.canvas.classList.add('visible');
-            this.resize(); // Ensure size is correct
-            if (this.textureNeedsUpdate) {
-                this.updateTexture(); // Update texture when shown if needed
-            } else {
-                this.render(); // Otherwise, just render
+            this.resize();
+            // Update texture only if content is loaded and needs update
+            if (this.isContentLoaded && this.textureNeedsUpdate) {
+                this.updateTexture();
+            } else if (this.isContentLoaded) {
+                // If content is loaded but texture is up-to-date, just render
+                this.render();
             }
+            // If content isn't loaded yet, loadHtmlContent will handle updateTexture/render later
         }
     }
 
@@ -197,7 +241,8 @@ export class TeletextEffect {
     }
 
     private render() {
-        if (!this.isVisible || !this.gl || this.textureNeedsUpdate) return;
+        // Render only if visible, context exists, content is loaded, and texture is updated
+        if (!this.isVisible || !this.gl || !this.isContentLoaded || this.textureNeedsUpdate) return;
 
         this.gl.clearColor(0, 0, 0, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
