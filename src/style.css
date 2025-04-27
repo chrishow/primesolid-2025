@@ -206,6 +206,27 @@ h1 {
         cursor: pointer;
       }
 
+      & .teletext {
+        position: absolute;
+        top: 1%;
+        left: 4%;
+        width: 92%;
+        height: auto;
+        pointer-events: none;
+        z-index: 1;
+        display: none;
+
+        &.visible {
+          display: block;
+        }
+
+        & img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
       & .scanlines {
         width: 100%;
         height: 100%;

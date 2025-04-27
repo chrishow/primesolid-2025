@@ -24,9 +24,9 @@ export class TV {
     private videoElement: HTMLVideoElement;
     private noiseCanvas: HTMLCanvasElement;
     private movieElement: HTMLElement; // Added to store the movie element
+    private teletextElement: HTMLElement; // Added to store the teletext element
     private currentChannel: number = 1;
     private buttons: NodeListOf<HTMLButtonElement>;
-    private channelDisplay: HTMLElement; // Keep reference to original (now hidden) div if needed, or remove
     private channelDisplayCanvas: HTMLCanvasElement; // Reference to the new canvas
     private channelDisplayEffect: ChannelDisplayEffect; // Instance of the effect class
     private channels: Map<number, Channel> = new Map(); // Changed value type to Channel
@@ -48,8 +48,8 @@ export class TV {
         this.videoElement = this.tvElement.querySelector('video') as HTMLVideoElement;
         this.noiseCanvas = this.tvElement.querySelector('.noise-canvas') as HTMLCanvasElement;
         this.movieElement = this.tvElement.querySelector('.movie') as HTMLElement;
+        this.teletextElement = this.tvElement.querySelector('.teletext') as HTMLElement; // Get the teletext element
         this.buttons = this.tvElement.querySelectorAll('.tv-case button') as NodeListOf<HTMLButtonElement>;
-        this.channelDisplay = this.tvElement.querySelector('.channel-display') as HTMLElement; // Original div
         this.channelDisplayCanvas = this.tvElement.querySelector('.channel-display-canvas') as HTMLCanvasElement; // New canvas
         this.knobElement = this.tvElement.querySelector('.knob-spot') as HTMLElement;
 
@@ -192,22 +192,42 @@ export class TV {
         const currentChannelData = this.channels.get(this.currentChannel);
 
         // Save current time of the video before changing the source
-        if (this.videoElement.src) {
+        if (this.videoElement.src && currentChannelData?.type === 'video') { // Only save if it was a video channel
             const currentTime = this.videoElement.currentTime;
             currentChannelData!.currentTime = currentTime; // Save the current time to the channel data
         }
 
-        if (channelData && channelData.video) {
-            this.videoElement.src = channelData.video;
-            if (channelData.currentTime) {
-                this.videoElement.currentTime = channelData.currentTime; // Set the video to the saved time
+        if (channelData) {
+            // Handle Teletext visibility
+            if (channelData.type === 'teletext') {
+                this.teletextElement.classList.add('visible');
+                this.videoElement.style.display = 'none'; // Hide video element
+                this.videoElement.pause(); // Pause video if it was playing
+            } else {
+                this.teletextElement.classList.remove('visible');
+                this.videoElement.style.display = ''; // Show video element
             }
-            // this.videoElement.play().catch(e => console.error("Video play failed", e));
+
+            // Handle video source
+            if (channelData.type === 'video' && channelData.video) {
+                this.videoElement.src = channelData.video;
+                if (channelData.currentTime) {
+                    this.videoElement.currentTime = channelData.currentTime; // Set the video to the saved time
+                }
+                // this.videoElement.play().catch(e => console.error("Video play failed", e));
+            } else if (channelData.type !== 'teletext') {
+                // Handle cases where channel data or video source is missing for non-teletext
+                console.warn(`Channel ${channelNumber} data or video source not found.`);
+                this.videoElement.src = ''; // Clear the video source or show static/default image
+            }
         } else {
-            // Handle cases where channel data or video source is missing
-            console.warn(`Channel ${channelNumber} data or video source not found.`);
-            this.videoElement.src = ''; // Clear the video source or show static/default image
+            // Handle case where channel data is missing entirely
+            console.warn(`Channel ${channelNumber} data not found.`);
+            this.videoElement.src = '';
+            this.teletextElement.classList.remove('visible');
+            this.videoElement.style.display = ''; // Ensure video is visible if channel data is bad
         }
+
 
         // Use the new effect class to display the text
         const channelName = channelData?.name || '-';
