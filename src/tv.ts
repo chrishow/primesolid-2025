@@ -1,5 +1,6 @@
 import { generateVCRNoise, setVCRNoiseIntensity } from './vcrNoise';
 import { ChannelDisplayEffect } from './channelDisplayEffect'; // Import the new class
+import { TeletextEffect } from './teletextEffect'; // Import the Teletext effect class
 
 // Define the structure of a channel object
 interface Channel {
@@ -24,11 +25,12 @@ export class TV {
     private videoElement: HTMLVideoElement;
     private noiseCanvas: HTMLCanvasElement;
     private movieElement: HTMLElement; // Added to store the movie element
-    private teletextElement: HTMLElement; // Added to store the teletext element
+    private teletextCanvas: HTMLCanvasElement; // Reference to the new teletext canvas
     private currentChannel: number = 1;
     private buttons: NodeListOf<HTMLButtonElement>;
     private channelDisplayCanvas: HTMLCanvasElement; // Reference to the new canvas
     private channelDisplayEffect: ChannelDisplayEffect; // Instance of the effect class
+    private teletextEffect: TeletextEffect; // Instance of the teletext effect class
     private channels: Map<number, Channel> = new Map(); // Changed value type to Channel
     private clickSound: HTMLAudioElement;
     private channelDisplayTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -48,13 +50,16 @@ export class TV {
         this.videoElement = this.tvElement.querySelector('video') as HTMLVideoElement;
         this.noiseCanvas = this.tvElement.querySelector('.noise-canvas') as HTMLCanvasElement;
         this.movieElement = this.tvElement.querySelector('.movie') as HTMLElement;
-        this.teletextElement = this.tvElement.querySelector('.teletext') as HTMLElement; // Get the teletext element
+        this.teletextCanvas = this.tvElement.querySelector('.teletext-canvas') as HTMLCanvasElement; // New teletext canvas
         this.buttons = this.tvElement.querySelectorAll('.tv-case button') as NodeListOf<HTMLButtonElement>;
         this.channelDisplayCanvas = this.tvElement.querySelector('.channel-display-canvas') as HTMLCanvasElement; // New canvas
         this.knobElement = this.tvElement.querySelector('.knob-spot') as HTMLElement;
 
-        // Instantiate the effect controller
+        // Instantiate the effect controllers
         this.channelDisplayEffect = new ChannelDisplayEffect(this.channelDisplayCanvas);
+        // Instantiate the Teletext effect controller with the image URL
+        const teletextImageUrl = 'src/i/teletext-weather.jpg'; // Make sure this path is correct
+        this.teletextEffect = new TeletextEffect(this.teletextCanvas, teletextImageUrl);
 
         this.clickSound = new Audio('src/i/click.mp3');
         this.clickSound.preload = 'auto'; // Hint to the browser to load it
@@ -198,13 +203,13 @@ export class TV {
         }
 
         if (channelData) {
-            // Handle Teletext visibility
+            // Handle Teletext visibility using the new effect class
             if (channelData.type === 'teletext') {
-                this.teletextElement.classList.add('visible');
+                this.teletextEffect.show(); // Show the WebGL teletext
                 this.videoElement.style.display = 'none'; // Hide video element
                 this.videoElement.pause(); // Pause video if it was playing
             } else {
-                this.teletextElement.classList.remove('visible');
+                this.teletextEffect.hide(); // Hide the WebGL teletext
                 this.videoElement.style.display = ''; // Show video element
             }
 
@@ -224,7 +229,7 @@ export class TV {
             // Handle case where channel data is missing entirely
             console.warn(`Channel ${channelNumber} data not found.`);
             this.videoElement.src = '';
-            this.teletextElement.classList.remove('visible');
+            this.teletextEffect.hide(); // Hide the WebGL teletext
             this.videoElement.style.display = ''; // Ensure video is visible if channel data is bad
         }
 
