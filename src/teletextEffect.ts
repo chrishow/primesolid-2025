@@ -1,6 +1,8 @@
 import vertexShaderSource from './shaders/channel-display.vert?raw';
 import fragmentShaderSource from './shaders/channel-display.frag?raw';
 
+import teletextStyle from './teletext.css?inline';
+
 export class TeletextEffect {
     private canvas: HTMLCanvasElement;
     private gl: WebGLRenderingContext;
@@ -162,6 +164,9 @@ export class TeletextEffect {
         // 1. Create SVG string with foreignObject containing the HTML
         // Ensure styles from the container are included or applied within the SVG/HTML
         const data = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}">
+                        <style><![CDATA[
+                            ${teletextStyle}
+                        ]]></style>
                         <foreignObject width="100%" height="100%">
                           <div xmlns="http://www.w3.org/1999/xhtml" style="width: ${svgWidth}px; height: ${svgHeight}px; background-color: #000020; color: lime; font-family: 'Share Tech Mono', monospace; font-size: 16px; padding: 10px; box-sizing: border-box;">
                             ${htmlString}
