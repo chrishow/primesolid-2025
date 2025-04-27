@@ -62,8 +62,16 @@
             <canvas class="channel-display-canvas"></canvas>
             <div class="movie wobbly glitch-effect">
               <video autoplay loop muted playsinline></video>
-              <div class="teletext">
-                <img src="src/i/teletext-weather.jpg" alt="teletext" />
+              <div class="teletext-html-content" style="width: 500px; height: 400px; background-color: #000020; color: lime; font-family: 'Share Tech Mono', monospace; font-size: 16px; padding: 10px; box-sizing: border-box;">
+                <p>P101 WEATHER</p>
+                <p>-------------------------</p>
+                <p>LONDON   SUNNY   15C</p>
+                <p>PARIS    CLOUDY  12C</p>
+                <p>BERLIN   RAIN    10C</p>
+                <p>MADRID   SUNNY   22C</p>
+                <p>ROME     SUNNY   20C</p>
+                <p>-------------------------</p>
+                <p>UPDATED: 27/04/25 10:00</p>
               </div>
               <canvas class="teletext-canvas"></canvas>
               <div class="scanlines"></div>
@@ -80,9 +88,12 @@
           <!-- Original div is now hidden -->
           <div class="tv-screen"></div>
           <div class="back-mask"></div>
-  
+
         </div>
       </div>
+
+      <!-- Add hidden SVG container -->
+      <svg class="teletext-svg" width="500" height="400" xmlns="http://www.w3.org/2000/svg"></svg>
 
       <p>
         Feel free to look around!

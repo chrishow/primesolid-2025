@@ -138,10 +138,13 @@ export class ChannelDisplayEffect {
 
         // Upload the 2D canvas content to the WebGL texture
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        // Tell WebGL to flip the Y axis on upload
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
         // Tell WebGL to premultiply alpha during texture upload
         this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.textCanvas);
-        // Reset pixel store parameter to default
+        // Reset pixel store parameters to default
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, false);
         this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     }
 

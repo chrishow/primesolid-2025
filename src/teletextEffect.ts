@@ -12,11 +12,15 @@ export class TeletextEffect {
     private textureLocation: WebGLUniformLocation | null;
     private curvatureLocation: WebGLUniformLocation | null;
 
-    private image!: HTMLImageElement; // Add definite assignment assertion
-    private isVisible: boolean = false;
-    private imageLoaded: boolean = false;
+    // HTML rendering related properties
+    private htmlContentElement: HTMLElement;
+    private htmlCanvas: HTMLCanvasElement;
+    private htmlCtx: CanvasRenderingContext2D;
 
-    constructor(canvas: HTMLCanvasElement, imageUrl: string) {
+    private isVisible: boolean = false;
+    private textureNeedsUpdate: boolean = true; // Flag to update texture on show
+
+    constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         const gl = this.canvas.getContext('webgl', { alpha: true });
         if (!gl) {
@@ -26,6 +30,23 @@ export class TeletextEffect {
 
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA);
+
+        // Get HTML content element
+        this.htmlContentElement = document.querySelector('.teletext-html-content') as HTMLElement;
+        if (!this.htmlContentElement) {
+            throw new Error('Required HTML content element .teletext-html-content not found');
+        }
+
+        // Create offscreen canvas for rendering HTML content
+        this.htmlCanvas = document.createElement('canvas');
+        // Use dimensions from the HTML content element or set fixed size
+        this.htmlCanvas.width = this.htmlContentElement.offsetWidth || 500;
+        this.htmlCanvas.height = this.htmlContentElement.offsetHeight || 400;
+        const htmlCtx = this.htmlCanvas.getContext('2d');
+        if (!htmlCtx) {
+            throw new Error('Could not get 2D context for HTML rendering');
+        }
+        this.htmlCtx = htmlCtx;
 
         this.program = this.createProgram(vertexShaderSource, fragmentShaderSource);
         this.gl.useProgram(this.program);
@@ -46,27 +67,8 @@ export class TeletextEffect {
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.STATIC_DRAW);
 
         this.texture = this.createTexture();
-        this.loadImage(imageUrl);
-
         this.gl.uniform1i(this.textureLocation, 0);
-
         this.resize();
-    }
-
-    private loadImage(url: string) {
-        this.image = new Image();
-        this.image.crossOrigin = "anonymous"; // Handle potential CORS issues if image is remote
-        this.image.onload = () => {
-            this.imageLoaded = true;
-            this.updateTexture();
-            if (this.isVisible) {
-                this.render(); // Re-render if visible when image loads
-            }
-        };
-        this.image.onerror = (err) => {
-            console.error("Error loading teletext image:", err);
-        };
-        this.image.src = url;
     }
 
     private createShader(type: number, source: string): WebGLShader {
@@ -111,18 +113,61 @@ export class TeletextEffect {
     }
 
     private updateTexture() {
-        if (!this.imageLoaded) return;
+        const ctx = this.htmlCtx;
+        const canvasWidth = this.htmlCanvas.width;
+        const canvasHeight = this.htmlCanvas.height;
 
+        // 1. Get computed styles from the HTML element for accuracy
+        const style = window.getComputedStyle(this.htmlContentElement);
+        const bgColor = style.backgroundColor || '#000020';
+        const textColor = style.color || 'lime';
+        const fontFamily = style.fontFamily || '"Share Tech Mono", monospace';
+        const fontSize = style.fontSize || '16px';
+        const lineHeight = parseInt(style.lineHeight) || (parseInt(fontSize) * 1.2);
+        const padding = parseInt(style.paddingTop) || 10;
+
+        // 2. Draw background
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+        // 3. Prepare text styling
+        ctx.fillStyle = textColor;
+        ctx.font = `${fontSize} ${fontFamily}`;
+        ctx.textBaseline = 'top';
+
+        // 4. Draw text lines (simple example: assumes <p> tags)
+        let yPos = padding;
+        const paragraphs = this.htmlContentElement.querySelectorAll('p');
+        paragraphs.forEach(p => {
+            // Basic text wrapping (adjust as needed)
+            const text = p.textContent || '';
+            // A more robust solution might measure text width and break lines
+            ctx.fillText(text, padding, yPos);
+            yPos += lineHeight;
+        });
+
+        // 5. Upload 2D canvas to WebGL texture
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.image);
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true); // Flip Y for WebGL
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.htmlCanvas);
+        this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, false);
+
+        this.textureNeedsUpdate = false; // Mark texture as updated
+        if (this.isVisible) {
+            this.render(); // Re-render if visible
+        }
     }
 
     public show() {
         if (!this.isVisible) {
             this.isVisible = true;
             this.canvas.classList.add('visible');
-            this.resize(); // Ensure size is correct before first render
-            this.render();
+            this.resize(); // Ensure size is correct
+            if (this.textureNeedsUpdate) {
+                this.updateTexture(); // Update texture when shown if needed
+            } else {
+                this.render(); // Otherwise, just render
+            }
         }
     }
 
@@ -130,9 +175,9 @@ export class TeletextEffect {
         if (this.isVisible) {
             this.isVisible = false;
             this.canvas.classList.remove('visible');
-            // Clear the canvas when hiding
             this.gl.clearColor(0, 0, 0, 0);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+            this.textureNeedsUpdate = true; // Mark that texture needs update next time it's shown
         }
     }
 
@@ -148,12 +193,11 @@ export class TeletextEffect {
                 this.render();
             }
         }
-        // Update resolution uniform regardless of visibility
         this.gl.uniform2f(this.resolutionLocation, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
     }
 
     private render() {
-        if (!this.isVisible || !this.gl || !this.imageLoaded) return;
+        if (!this.isVisible || !this.gl || this.textureNeedsUpdate) return;
 
         this.gl.clearColor(0, 0, 0, 0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
@@ -168,9 +212,8 @@ export class TeletextEffect {
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
         this.gl.uniform1i(this.textureLocation, 0);
 
-        // Update uniforms
         this.gl.uniform2f(this.resolutionLocation, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
-        this.gl.uniform1f(this.curvatureLocation, 0.2); // Same curvature as channel display
+        this.gl.uniform1f(this.curvatureLocation, 0.2);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }

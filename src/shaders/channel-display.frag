@@ -23,7 +23,7 @@ void main() {
     vec2 uv = v_texCoord;
 
     // Flip Y coordinate because texture coordinates often start from top-left
-    uv.y = 1.0 - uv.y;
+    // uv.y = 1.0 - uv.y; // REMOVE THIS LINE - UNPACK_FLIP_Y_WEBGL handles this
 
     // Apply barrel distortion for the CRT curve effect
     float curvatureStrength = 0.2; // Adjust this value for more/less curve

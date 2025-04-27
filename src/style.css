@@ -206,19 +206,8 @@ h1 {
         cursor: pointer;
       }
 
-      & .teletext {
-        position: absolute;
-        inset: 0;
+      & .teletext-html-content {
         display: none; 
-
-        pointer-events: none;
-        z-index: 1;
-
-        & img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
       }
 
       & .teletext-canvas { 

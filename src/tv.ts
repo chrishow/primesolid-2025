@@ -24,13 +24,13 @@ export class TV {
     private tvElement: HTMLElement;
     private videoElement: HTMLVideoElement;
     private noiseCanvas: HTMLCanvasElement;
-    private movieElement: HTMLElement; // Added to store the movie element
+    private movieElement: HTMLElement;
     private teletextCanvas: HTMLCanvasElement; // Reference to the new teletext canvas
     private currentChannel: number = 1;
     private buttons: NodeListOf<HTMLButtonElement>;
     private channelDisplayCanvas: HTMLCanvasElement; // Reference to the new canvas
     private channelDisplayEffect: ChannelDisplayEffect; // Instance of the effect class
-    private teletextEffect: TeletextEffect; // Instance of the teletext effect class
+    private teletextEffect: TeletextEffect; // Instance of the Teletext effect class
     private channels: Map<number, Channel> = new Map(); // Changed value type to Channel
     private clickSound: HTMLAudioElement;
     private channelDisplayTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -50,16 +50,20 @@ export class TV {
         this.videoElement = this.tvElement.querySelector('video') as HTMLVideoElement;
         this.noiseCanvas = this.tvElement.querySelector('.noise-canvas') as HTMLCanvasElement;
         this.movieElement = this.tvElement.querySelector('.movie') as HTMLElement;
-        this.teletextCanvas = this.tvElement.querySelector('.teletext-canvas') as HTMLCanvasElement; // New teletext canvas
+        this.teletextCanvas = this.tvElement.querySelector('.teletext-canvas') as HTMLCanvasElement; // Re-add this line
         this.buttons = this.tvElement.querySelectorAll('.tv-case button') as NodeListOf<HTMLButtonElement>;
-        this.channelDisplayCanvas = this.tvElement.querySelector('.channel-display-canvas') as HTMLCanvasElement; // New canvas
+        this.channelDisplayCanvas = this.tvElement.querySelector('.channel-display-canvas') as HTMLCanvasElement;
         this.knobElement = this.tvElement.querySelector('.knob-spot') as HTMLElement;
 
         // Instantiate the effect controllers
         this.channelDisplayEffect = new ChannelDisplayEffect(this.channelDisplayCanvas);
-        // Instantiate the Teletext effect controller with the image URL
-        const teletextImageUrl = 'src/i/teletext-weather.jpg'; // Make sure this path is correct
-        this.teletextEffect = new TeletextEffect(this.teletextCanvas, teletextImageUrl);
+        // Check if teletextCanvas was found before creating the effect
+        if (!this.teletextCanvas) {
+            console.error("Failed to find .teletext-canvas element!");
+            // Handle the error appropriately, maybe throw or return
+            throw new Error("Teletext canvas element not found.");
+        }
+        this.teletextEffect = new TeletextEffect(this.teletextCanvas);
 
         this.clickSound = new Audio('src/i/click.mp3');
         this.clickSound.preload = 'auto'; // Hint to the browser to load it
@@ -70,7 +74,6 @@ export class TV {
         this.changeChannel(this.currentChannel); // Load initial channel video
 
         generateVCRNoise(this.noiseCanvas);
-        this.updateEffectsBasedOnKnob(); // Initial effect settings based on default knob position
     }
 
     private playClickSound() {
@@ -97,6 +100,7 @@ export class TV {
         // Add touchmove and touchend listeners
         document.addEventListener('touchmove', (e) => this.knobMouseMove(e as any), { passive: false });
         document.addEventListener('touchend', this.knobMouseUp.bind(this));
+        this.updateEffectsBasedOnKnob(); // Initial effect settings based on default knob position
     }
 
     private getAngle(event: MouseEvent | TouchEvent): number {
@@ -206,11 +210,11 @@ export class TV {
             // Handle Teletext visibility using the new effect class
             if (channelData.type === 'teletext') {
                 this.teletextEffect.show(); // Show the WebGL teletext
-                this.videoElement.style.display = 'none'; // Hide video element
-                this.videoElement.pause(); // Pause video if it was playing
+                this.videoElement.style.display = 'none';
+                this.videoElement.pause();
             } else {
                 this.teletextEffect.hide(); // Hide the WebGL teletext
-                this.videoElement.style.display = ''; // Show video element
+                this.videoElement.style.display = '';
             }
 
             // Handle video source
@@ -230,7 +234,7 @@ export class TV {
             console.warn(`Channel ${channelNumber} data not found.`);
             this.videoElement.src = '';
             this.teletextEffect.hide(); // Hide the WebGL teletext
-            this.videoElement.style.display = ''; // Ensure video is visible if channel data is bad
+            this.videoElement.style.display = '';
         }
 
 
