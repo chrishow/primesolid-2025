@@ -113,7 +113,7 @@ h1 {
       pointer-events: none;
       opacity: 0; /* Start hidden */
       animation: glitch2 1s infinite;
-      transition: opacity 0;
+      transition: opacity 0s;
 
       &.visible {
         opacity: 1;

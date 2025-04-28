@@ -34,8 +34,8 @@ export class ChannelDisplayEffect {
         // Create offscreen canvas for rendering text
         this.textCanvas = document.createElement('canvas');
         // Set dimensions based on target display size or desired texture resolution
-        this.textCanvas.width = 512; // Adjust as needed
-        this.textCanvas.height = 256; // Adjust as needed
+        this.textCanvas.width = 533; // Adjust as needed
+        this.textCanvas.height = 395; // Adjust as needed
         const textCtx = this.textCanvas.getContext('2d');
         if (!textCtx) {
             throw new Error('Could not get 2D context for text rendering');
