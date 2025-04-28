@@ -33,7 +33,7 @@
         },,
         {
           number: 4,
-          name: 'TELETEXT',
+          name: 'C4',
           type: 'teletext',
         },
       ]
@@ -56,13 +56,15 @@
 
       <h2>Projects</h2>
 
+      <p>Check out a few recent projects on the ProjectScope! Find information on what’s on in the listings...</p>
+
       <div class="projects">
         <div class="tv">
           <div>
             <canvas class="channel-display-canvas"></canvas>
             <div class="movie wobbly glitch-effect">
               <video autoplay loop muted playsinline></video>
-              <div class="teletext-html-content" style="width: 500px; height: 400px; background-color: #000020; color: lime; font-family: 'Share Tech Mono', monospace; font-size: 16px; padding: 10px; box-sizing: border-box;">
+              <div class="teletext-html-content">
               </div>
               <canvas class="teletext-canvas"></canvas>
               <div class="scanlines"></div>
@@ -82,12 +84,9 @@
         </div>
       </div>
 
-      <!-- Add hidden SVG container -->
-      <svg class="teletext-svg" width="500" height="400" xmlns="http://www.w3.org/2000/svg"></svg>
-
-      <p>
-        Feel free to look around!
-      </p>
+      <div class="listings">
+        Foo
+      </div>
 
       <p>
         This is a simple fog effect using WebGL and GLSL. The fog is created by

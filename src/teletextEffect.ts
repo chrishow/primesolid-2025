@@ -1,6 +1,9 @@
 import vertexShaderSource from './shaders/channel-display.vert?raw';
 import fragmentShaderSource from './shaders/channel-display.frag?raw';
 
+import { loadLocation } from './loadLocation';
+import { loadWeather } from './loadWeather';
+
 import teletextStyle from './teletext.css?inline';
 
 export class TeletextEffect {
@@ -44,8 +47,8 @@ export class TeletextEffect {
         // Create offscreen canvas for rendering the SVG image
         this.htmlCanvas = document.createElement('canvas');
         // Use dimensions from the HTML content element's style or defaults
-        this.htmlCanvas.width = parseInt(this.htmlContentElement.style.width) || 500;
-        this.htmlCanvas.height = parseInt(this.htmlContentElement.style.height) || 400;
+        this.htmlCanvas.width = parseInt(this.htmlContentElement.style.width) || 533;
+        this.htmlCanvas.height = parseInt(this.htmlContentElement.style.height) || 395;
         const htmlCtx = this.htmlCanvas.getContext('2d');
         if (!htmlCtx) {
             throw new Error('Could not get 2D context for HTML rendering');
@@ -89,6 +92,37 @@ export class TeletextEffect {
             }
             const html = await response.text();
             this.htmlContentElement.innerHTML = html;
+
+            // Update the date to today's date
+            const dateElement = this.htmlContentElement.querySelector('.date');
+            if (dateElement) {
+                dateElement.textContent = new Date().toLocaleDateString('en-UK', {
+                    month: 'short',
+                    day: '2-digit',
+                });
+            }
+
+            // Get the user's location
+            const locationData = await loadLocation();
+            console.log('Location data:', locationData);
+            const locationElement = this.htmlContentElement.querySelector('.location');
+            if (locationElement) {
+                locationElement.textContent = locationData.city;
+            }
+
+            // Get the weather data
+            const weatherData = await loadWeather(locationData.lat, locationData.lon);
+            console.log('Weather data:', weatherData);
+            const data = ['conditions', 'temp', 'feelslike', 'windspeed', 'winddir', 'humidity', 'uvindex'];
+            data.forEach((key) => {
+                const element = this.htmlContentElement.querySelector(`.${key}`);
+                if (element) {
+                    element.textContent = weatherData['currentConditions'][key];
+                }
+            });
+
+
+
             this.isContentLoaded = true;
             // If the effect is already visible when content loads, update the texture
             if (this.isVisible) {
@@ -168,7 +202,7 @@ export class TeletextEffect {
                             ${teletextStyle}
                         ]]></style>
                         <foreignObject width="100%" height="100%">
-                          <div xmlns="http://www.w3.org/1999/xhtml" style="width: ${svgWidth}px; height: ${svgHeight}px; background-color: #000020; color: lime; font-family: 'Share Tech Mono', monospace; font-size: 16px; padding: 10px; box-sizing: border-box;">
+                          <div xmlns="http://www.w3.org/1999/xhtml" style="width: ${svgWidth}px; height: ${svgHeight}px;">
                             ${htmlString}
                           </div>
                         </foreignObject>

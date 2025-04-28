@@ -10,7 +10,8 @@
   },
   "devDependencies": {
     "typescript": "~5.7.2",
-    "vite": "^6.3.1"
+    "vite": "^6.3.1",
+    "vite-plugin-full-reload": "^1.2.0"
   },
   "dependencies": {
     "glslCanvas": "^0.2.6"

@@ -1,7 +1,7 @@
-## Notes
+# Notes
 
 
-CREDITS 
+## CREDITS 
 
 Wobble and scanlines from here:
 https://codepen.io/Mobius1/pen/ZNgwbr
@@ -17,7 +17,7 @@ https://codepen.io/Mobius1/pen/ZNgwbr
 
 
 
-TOOLS
+## TOOLS
 
 Cut videos with this:
 https://online-video-cutter.com/
@@ -25,3 +25,16 @@ https://online-video-cutter.com/
 Background remover:
 https://www.photoroom.com/tools/background-remover
 
+
+
+## WEATHER
+
+This link works from city name, but need to do lat/long:
+```
+https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/santa%20cruz%20de%20la%20palma?unitGroup=us&include=current&key=CZWZGWKKZEH274SCFWU2G4GJ3&contentType=json
+```
+
+Lat/long: 
+```
+https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/28.6812%2C-17.7609?unitGroup=us&include=current&key=CZWZGWKKZEH274SCFWU2G4GJ3&contentType=json
+```

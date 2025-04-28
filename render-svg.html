@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML -> SVG -> Canvas</title> 
+    <style>
+body {
+  font-family: sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+div,
+svg,
+canvas{
+  display: block;
+  width: 300px;
+  height: 300px;
+/*   margin-bottom: 0.5em; */
+}
+    </style>
+  </head>
+  <body>
+    <h1>HTML -> SVG -> Canvas</h1>
+
+    <p>This demo inserts HTML from a source div into a foreignObject element inside an svg, which is then rendered into a 2d canvas. Ideally, they should all look the same.</p>
+    
+    <section class=container>
+    
+    <div id=sourceDiv style='width:300px; height: 300px; background-color: hotpink;color:blue;font-family: monospace;'>
+      <h1 style='font-size: 2em; margin: 0; color: yellow'>Foo</h1>
+      <p>Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet </p>
+    </div>
+    
+    
+    <svg id='svg' viewBox="0 0 300 300" width=300 height=300>
+      
+    </svg>
+    
+    <canvas id='canvas' width=300 height=300 style='background-color: yellow;'></canvas>
+      
+    </section>
+
+    <script>
+        // --- 1. Get a reference to your SVG element ---
+// Replace 'your-svg-id' with the actual ID of your SVG element
+const svgElement = document.getElementById('svg');
+
+const sourceElement = document.getElementById('sourceDiv');
+
+// --- Define the necessary CSS including the @font-face rule with embedded font data ---
+// PASTE YOUR BASE64 FONT DATA HERE:
+const fontBase64Data = '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';
+
+
+const fontFaceRule = `@font-face {
+  font-family: 'Workbench';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(data:font/woff2;base64,${fontBase64Data}) format('woff2');
+}`;
+const h1Rule = `h1 { font-family: "Workbench"; }`; // Ensure h1 inside foreignObject uses it
+const embeddedStyles = `<style>${fontFaceRule}\n${h1Rule}</style>`;
+
+// --- Prepend styles to the HTML content ---
+const originalHtmlContent = sourceElement.outerHTML;
+const htmlContentWithStyles = embeddedStyles + originalHtmlContent;
+
+console.log("HTML content with embedded styles:", htmlContentWithStyles);
+
+// --- Check if the SVG element exists ---
+if (svgElement) {
+  // --- 3. Create the <foreignObject> element ---
+  const svgNamespace = "http://www.w3.org/2000/svg";
+  const foreignObject = document.createElementNS(svgNamespace, 'foreignObject');
+
+  foreignObject.setAttribute('x', 0);         foreignObject.setAttribute('y', 0);         foreignObject.setAttribute('width', 300);   foreignObject.setAttribute('height', 300);   
+  // --- Use the HTML with embedded styles ---
+  foreignObject.innerHTML = htmlContentWithStyles;
+
+  svgElement.appendChild(foreignObject);
+
+  console.log('foreignObject added to SVG successfully.');
+  
+  // --- Wait for fonts to be ready before drawing ---
+  document.fonts.ready.then(() => {
+      console.log('Fonts are ready, drawing SVG to canvas.');
+      drawSvgToCanvas('svg', 'canvas');
+  }).catch(err => {
+      console.error('Font loading error:', err);
+      // Still attempt to draw, might work without the custom font
+      drawSvgToCanvas('svg', 'canvas');
+  });
+
+} else {
+  console.error("Could not find the SVG element with the specified ID.");
+}
+
+
+ function drawSvgToCanvas(svgId, canvasId) {
+    const svgElement = document.getElementById(svgId);
+    const canvasElement = document.getElementById(canvasId);
+
+    if (!svgElement || !canvasElement) {
+      console.error("SVG or Canvas element not found!");
+      return;
+    }
+
+    const ctx = canvasElement.getContext('2d');
+
+    // --- 1. Serialize the SVG ---
+    const svgXml = new XMLSerializer().serializeToString(svgElement);
+
+    // --- 2. Create a Data URI ---
+    // Base64 encoding is generally safer for complex SVGs or those with special chars
+    const svgBase64 = btoa(unescape(encodeURIComponent(svgXml))); // Handle UTF-8 correctly before btoa
+    const dataUri = `data:image/svg+xml;base64,${svgBase64}`;
+    // Alternative (might have issues with certain characters):
+    // const dataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgXml)}`;
+
+    // --- 3. Create an Image Object ---
+    const img = new Image();
+
+    // --- 5. Wait for Load ---
+    img.onload = () => {
+      console.log('SVG image loaded successfully.');
+      // Clear previous canvas content
+      ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      // --- 6. Draw to Canvas ---
+      // You can control position and scaling here:
+      // ctx.drawImage(img, dx, dy);
+      // ctx.drawImage(img, dx, dy, dWidth, dHeight);
+      // ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+
+      // Draw the image matching canvas size
+      ctx.drawImage(img, 0, 0, canvasElement.width, canvasElement.height);
+      console.log('SVG drawn onto canvas.');
+    };
+
+    img.onerror = (err) => {
+        console.error('Error loading SVG image:', err);
+        // Potentially draw an error message on the canvas
+        ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        ctx.fillStyle = 'red';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('Error loading SVG for canvas', 10, 20);
+    };
+
+    // --- 4. Set the Image Source ---
+    img.src = dataUri;
+  }
+
+    </script>    
+  </body>
+</html>

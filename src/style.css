@@ -1,5 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Workbench&display=block');
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=block');
+/* @import url('https://fonts.googleapis.com/css2?family=Workbench&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=block'); */
+
+@import 'teletext.css';
 
 :root {
   --text-color: #213547; /* Dark blue for light mode */
@@ -43,23 +45,6 @@ canvas#glslCanvas {
 
 
 
-.knob-spot {
-  background: rgba(255, 0, 255, 0.0) url(i/knob-spot.png) no-repeat center center;
-  background-size: cover;
-  position: absolute;
-  display: block;
-  z-index: 1;
-  top: 62.8%;
-  left: 79%;
-  width: 12.83%;
-  height: 18.18%;
-  pointer-events: all;
-
-  transform-origin: center center;
-  transform: rotate(0deg);
-  border-radius: 100%;
-  cursor: pointer;
-}
 
 .content {
   --content-padding: 2em;
@@ -94,6 +79,7 @@ h1 {
 
 .projects {
   position: relative;
+  margin-bottom: 2em;
 
   & .tv {
     position: relative;
@@ -118,6 +104,24 @@ h1 {
       &.visible {
         opacity: 1;
       }
+    }
+
+    .knob-spot {
+      background: rgba(255, 0, 255, 0.0) url(i/knob-spot.png) no-repeat center center;
+      background-size: cover;
+      position: absolute;
+      display: block;
+      z-index: 1;
+      top: 62.8%;
+      left: 79%;
+      width: 12.83%;
+      height: 18.18%;
+      pointer-events: all;
+
+      transform-origin: center center;
+      transform: rotate(0deg);
+      border-radius: 100%;
+      cursor: pointer;
     }
 
     & .tv-case, 
@@ -208,9 +212,13 @@ h1 {
 
       & .teletext-html-content {
         display: none; 
+        /* opacity: 0; */
+
         position: relative;
-        z-index: 2;
-        opacity: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        background-color: rgb(18, 34, 18);
       }
 
       & .teletext-canvas { 
@@ -405,3 +413,4 @@ h1 {
     background-color: #111; 
   } */
 }
+

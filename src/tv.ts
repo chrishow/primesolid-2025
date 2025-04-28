@@ -26,7 +26,7 @@ export class TV {
     private noiseCanvas: HTMLCanvasElement;
     private movieElement: HTMLElement;
     private teletextCanvas: HTMLCanvasElement; // Reference to the new teletext canvas
-    private currentChannel: number = 4;
+    private currentChannel: number = 1;
     private buttons: NodeListOf<HTMLButtonElement>;
     private channelDisplayCanvas: HTMLCanvasElement; // Reference to the new canvas
     private channelDisplayEffect: ChannelDisplayEffect; // Instance of the effect class
