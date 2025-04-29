@@ -1,6 +1,6 @@
 import { generateVCRNoise, setVCRNoiseIntensity } from './vcrNoise';
-import { ChannelDisplayEffect } from './channelDisplayEffect'; // Import the new class
-import { TeletextEffect } from './teletextEffect'; // Import the Teletext effect class
+import { ChannelDisplayEffect } from './channelDisplayEffect';
+import { TeletextEffect } from './teletextEffect';
 
 // Define the structure of a channel object
 interface Channel {
@@ -25,32 +25,32 @@ export class TV {
     private videoElement: HTMLVideoElement;
     private noiseCanvas: HTMLCanvasElement;
     private movieElement: HTMLElement;
-    private teletextCanvas: HTMLCanvasElement; // Reference to the new teletext canvas
+    private teletextCanvas: HTMLCanvasElement; // This is where we render the teletext WebGL
     private currentChannel: number = 1;
     private buttons: NodeListOf<HTMLButtonElement>;
-    private channelDisplayCanvas: HTMLCanvasElement; // Reference to the new canvas
-    private channelDisplayEffect: ChannelDisplayEffect; // Instance of the effect class
-    private teletextEffect: TeletextEffect; // Instance of the Teletext effect class
-    private channels: Map<number, Channel> = new Map(); // Changed value type to Channel
+    private channelDisplayCanvas: HTMLCanvasElement; // Where we draw the channel display WebGL
+    private channelDisplayEffect: ChannelDisplayEffect;
+    private teletextEffect: TeletextEffect;
+    private channels: Map<number, Channel> = new Map(); // Map of available channels
     private clickSound: HTMLAudioElement;
     private channelDisplayTimeout: ReturnType<typeof setTimeout> | null = null;
-    private glitchTimeout: ReturnType<typeof setTimeout> | null = null; // Added for glitch control
+    private glitchTimeout: ReturnType<typeof setTimeout> | null = null; // Glitch schedule timer
     private isGlitching: boolean = false; // Track if glitch animation is active
 
     // Knob related properties
     private knobElement: HTMLElement;
     private isDraggingKnob: boolean = false;
     private knobPreviousDragAngle: number = 0; // Angle during the previous move event
-    private knobCurrentAngle: number = 0; // Current rotation angle of the knob
-    private minKnobAngle: number = -90; // Minimum rotation angle
-    private maxKnobAngle: number = 90;  // Maximum rotation angle (180 degree range)
+    private knobCurrentAngle: number = 0;
+    private minKnobAngle: number = -90;
+    private maxKnobAngle: number = 90;
 
     constructor() {
         this.tvElement = document.querySelector('.tv') as HTMLElement;
         this.videoElement = this.tvElement.querySelector('video') as HTMLVideoElement;
         this.noiseCanvas = this.tvElement.querySelector('.noise-canvas') as HTMLCanvasElement;
         this.movieElement = this.tvElement.querySelector('.movie') as HTMLElement;
-        this.teletextCanvas = this.tvElement.querySelector('.teletext-canvas') as HTMLCanvasElement; // Re-add this line
+        this.teletextCanvas = this.tvElement.querySelector('.teletext-canvas') as HTMLCanvasElement;
         this.buttons = this.tvElement.querySelectorAll('.tv-case button') as NodeListOf<HTMLButtonElement>;
         this.channelDisplayCanvas = this.tvElement.querySelector('.channel-display-canvas') as HTMLCanvasElement;
         this.knobElement = this.tvElement.querySelector('.knob-spot') as HTMLElement;
@@ -70,7 +70,7 @@ export class TV {
         this.clickSound.volume = 0.6; // Set volume to 50%
 
         this.setupChannels();
-        this.setupKnob(); // Add this line to setup the knob
+        this.setupKnob();
         this.changeChannel(this.currentChannel); // Load initial channel video
 
         generateVCRNoise(this.noiseCanvas);
@@ -79,9 +79,9 @@ export class TV {
     private playClickSound() {
         // Reset playback to the beginning in case it's clicked rapidly
         this.clickSound.currentTime = 0;
-        this.clickSound.play().catch(error => {
-            // Autoplay might be blocked initially, handle potential errors
-            console.error("Error playing click sound:", error);
+        this.clickSound.play().catch(_error => {
+            // Can't actually do anything about errors here
+            // console.error("Error playing click sound:", _error);
         });
     }
 
@@ -124,8 +124,6 @@ export class TV {
         const deltaY = clientY - centerY;
         // Calculate angle in degrees (atan2 returns radians)
         let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-        // Adjust angle to be 0-360 degrees (optional, depends on desired behavior)
-        // angle = (angle + 360) % 360;
         return angle;
     }
 
@@ -142,9 +140,7 @@ export class TV {
         this.isDraggingKnob = true;
         // Store the angle at the start of the drag
         this.knobPreviousDragAngle = this.getAngle(event);
-        // Calculate the offset between the initial click angle and the current knob angle
-        // this.knobStartAngle = this.knobPreviousDragAngle - this.knobCurrentAngle; // Removed unused variable assignment
-        this.knobElement.classList.add('dragging'); // Optional: Add class for styling
+        // this.knobElement.classList.add('dragging'); // Optional: Add class for styling
     }
 
     private knobMouseMove(event: MouseEvent | TouchEvent) {
@@ -179,20 +175,19 @@ export class TV {
         // Update effects based on the new knob angle
         this.updateEffectsBasedOnKnob();
 
-        // Dispatch a custom event with the current angle
-        const rotateEvent = new CustomEvent('knob-rotate', {
-            detail: { angle: this.knobCurrentAngle },
-            bubbles: true,
-            cancelable: true
-        });
-        this.knobElement.dispatchEvent(rotateEvent);
+        // Optional: Dispatch a custom event with the current angle
+        // const rotateEvent = new CustomEvent('knob-rotate', {
+        //     detail: { angle: this.knobCurrentAngle },
+        //     bubbles: true,
+        //     cancelable: true
+        // });
+        // this.knobElement.dispatchEvent(rotateEvent);
     }
 
     private knobMouseUp() {
         if (!this.isDraggingKnob) return;
         this.isDraggingKnob = false;
-        this.knobElement.classList.remove('dragging'); // Optional: Remove styling class
-        // You might want to snap to specific values or perform final actions here
+        // this.knobElement.classList.remove('dragging'); // Optional: Remove styling class
     }
 
 
@@ -207,7 +202,6 @@ export class TV {
         }
 
         if (channelData) {
-            // Handle Teletext visibility using the new effect class
             if (channelData.type === 'teletext') {
                 this.teletextEffect.show(); // Show the WebGL teletext
                 this.videoElement.style.display = 'none';

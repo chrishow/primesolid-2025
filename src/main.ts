@@ -1,4 +1,4 @@
-import fragmentSource from './gl-fog.frag?raw';
+import fragmentSource from './shaders/gl-fog.frag?raw';
 import { setupFog } from './fog';
 import { initializeGlitchEffect } from './glitchEffect';
 import { TV } from './tv';
