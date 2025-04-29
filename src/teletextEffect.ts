@@ -162,8 +162,8 @@ export class TeletextEffect extends BaseCRTEffect {
     // protected resize(): void {
     //     super.resize();
     //     // If SVG/HTML layout needs recalculation based on size, do it here
-    //     // this.textureNeedsUpdate = true;
-    //     // if (this.isVisible) this.updateTextureContent();
+    //     this.textureNeedsUpdate = true;
+    //     if (this.isVisible) this.updateTextureContent();
     // }
 
     // render() is inherited from BaseCRTEffect

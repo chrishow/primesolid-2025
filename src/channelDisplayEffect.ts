@@ -76,12 +76,12 @@ export class ChannelDisplayEffect extends BaseCRTEffect {
     // }
 
     // Override resize if text rendering depends on size, otherwise base class is fine
-    // protected resize(): void {
-    //     super.resize();
-    //     // If text layout needs recalculation based on size, do it here
-    //     // this.textureNeedsUpdate = true;
-    //     // if (this.isVisible) this.updateTextureContent();
-    // }
+    protected resize(): void {
+        super.resize();
+        // If text layout needs recalculation based on size, do it here
+        this.textureNeedsUpdate = true;
+        if (this.isVisible) this.updateTextureContent();
+    }
 
     // render() is inherited from BaseCRTEffect
 }

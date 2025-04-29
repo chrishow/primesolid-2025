@@ -49,6 +49,23 @@ export abstract class BaseCRTEffect {
 
         // Initial resize to set viewport and resolution uniform
         this.resize();
+
+        // Debounced resize handler
+        let resizeTimeout: ReturnType<typeof setTimeout>;
+        const debouncedResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                this.resize();
+            }, 100); // Adjust debounce delay (ms) as needed
+        };
+
+        window.addEventListener('resize', debouncedResize);
+
+        // Optional: Consider cleanup if the effect is ever destroyed
+        // this.cleanup = () => {
+        //     window.removeEventListener('resize', debouncedResize);
+        //     // ... other cleanup ...
+        // };
     }
 
     protected createShader(type: number, source: string): WebGLShader {
