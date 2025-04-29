@@ -1,23 +1,7 @@
 import { generateVCRNoise, setVCRNoiseIntensity } from './vcrNoise';
 import { ChannelDisplayEffect } from './channelDisplayEffect';
 import { TeletextEffect } from './teletextEffect';
-
-// Define the structure of a channel object
-interface Channel {
-    number: number;
-    name: string;
-    type: string; // 'video' or 'teletext'
-    video?: string;
-    link?: string;
-    currentTime?: number; // Optional property to store the current playback time
-}
-
-// Extend the Window interface to include our custom 'channels' property
-declare global {
-    interface Window {
-        channels?: Channel[];
-    }
-}
+import { channels as channelData, ChannelConfig } from './channelConfig'; // Import config
 
 
 export class TV {
@@ -31,7 +15,7 @@ export class TV {
     private channelDisplayCanvas: HTMLCanvasElement; // Where we draw the channel display WebGL
     private channelDisplayEffect: ChannelDisplayEffect;
     private teletextEffect: TeletextEffect;
-    private channels: Map<number, Channel> = new Map(); // Map of available channels
+    private channels: Map<number, ChannelConfig> = new Map(); // Use ChannelConfig
     private clickSound: HTMLAudioElement;
     private channelDisplayTimeout: ReturnType<typeof setTimeout> | null = null;
     private glitchTimeout: ReturnType<typeof setTimeout> | null = null; // Glitch schedule timer
@@ -57,21 +41,19 @@ export class TV {
 
         // Instantiate the effect controllers
         this.channelDisplayEffect = new ChannelDisplayEffect(this.channelDisplayCanvas);
-        // Check if teletextCanvas was found before creating the effect
         if (!this.teletextCanvas) {
             console.error("Failed to find .teletext-canvas element!");
-            // Handle the error appropriately, maybe throw or return
             throw new Error("Teletext canvas element not found.");
         }
         this.teletextEffect = new TeletextEffect(this.teletextCanvas);
 
         this.clickSound = new Audio('src/i/click.mp3');
-        this.clickSound.preload = 'auto'; // Hint to the browser to load it
-        this.clickSound.volume = 0.6; // Set volume to 50%
+        this.clickSound.preload = 'auto';
+        this.clickSound.volume = 0.6;
 
-        this.setupChannels();
+        this.setupChannels(); // Load channels from imported config
         this.setupKnob();
-        this.changeChannel(this.currentChannel); // Load initial channel video
+        this.changeChannel(this.currentChannel); // Load initial channel
 
         generateVCRNoise(this.noiseCanvas);
     }
@@ -196,99 +178,78 @@ export class TV {
         const currentChannelData = this.channels.get(this.currentChannel);
 
         // Save current time of the video before changing the source
-        if (this.videoElement.src && currentChannelData?.type === 'video') { // Only save if it was a video channel
+        if (this.videoElement.src && currentChannelData?.type === 'video') {
             const currentTime = this.videoElement.currentTime;
-            currentChannelData!.currentTime = currentTime; // Save the current time to the channel data
+            // Use non-null assertion as we checked type === 'video'
+            currentChannelData!.currentTime = currentTime;
         }
 
         if (channelData) {
             if (channelData.type === 'teletext') {
-                this.teletextEffect.show(); // Show the WebGL teletext
+                this.teletextEffect.show();
                 this.videoElement.style.display = 'none';
                 this.videoElement.pause();
-            } else {
-                this.teletextEffect.hide(); // Hide the WebGL teletext
+            } else { // Assumed video type if not teletext
+                this.teletextEffect.hide();
                 this.videoElement.style.display = '';
-            }
-
-            // Handle video source
-            if (channelData.type === 'video' && channelData.video) {
-                this.videoElement.src = channelData.video;
-                if (channelData.currentTime) {
-                    this.videoElement.currentTime = channelData.currentTime; // Set the video to the saved time
+                if (channelData.video) {
+                    this.videoElement.src = channelData.video;
+                    // Restore saved time if available
+                    this.videoElement.currentTime = channelData.currentTime ?? 0;
+                    // this.videoElement.play().catch(e => console.error("Video play failed", e));
+                } else {
+                    console.warn(`Channel ${channelNumber} is type 'video' but missing video source.`);
+                    this.videoElement.src = '';
                 }
-                // this.videoElement.play().catch(e => console.error("Video play failed", e));
-            } else if (channelData.type !== 'teletext') {
-                // Handle cases where channel data or video source is missing for non-teletext
-                console.warn(`Channel ${channelNumber} data or video source not found.`);
-                this.videoElement.src = ''; // Clear the video source or show static/default image
             }
         } else {
-            // Handle case where channel data is missing entirely
             console.warn(`Channel ${channelNumber} data not found.`);
             this.videoElement.src = '';
-            this.teletextEffect.hide(); // Hide the WebGL teletext
+            this.teletextEffect.hide();
             this.videoElement.style.display = '';
         }
-
 
         // Use the new effect class to display the text
         const channelName = channelData?.name || '-';
         this.channelDisplayEffect.setText(channelName);
         this.channelDisplayEffect.show();
-        // Remove direct manipulation of the old div's visibility/text
-        // this.channelDisplay.textContent = channelData?.name || '-';
-        // this.channelDisplay.classList.add('visible');
 
         this.currentChannel = channelNumber;
 
         if (this.channelDisplayTimeout) {
-            clearTimeout(this.channelDisplayTimeout); // Clear any existing timeout
+            clearTimeout(this.channelDisplayTimeout);
         }
 
         // Use the effect class to hide after delay
         this.channelDisplayTimeout = setTimeout(() => {
             this.channelDisplayEffect.hide();
-            // this.channelDisplay.classList.remove('visible');
         }, 3000); // Remove after delay
     }
-
 
     private setupChannels() {
         // Bind event listeners to buttons
         this.tvElement.addEventListener('mousedown', (e) => {
-            const button: HTMLElement = (e.target as Element).closest('.tv-case button')!;
-            if (button) { // Check if a button was clicked or something inside it
+            const button = (e.target as Element).closest<HTMLButtonElement>('.tv-case button');
+            if (button) {
                 const channel = parseInt(button.dataset.channel || '1', 10);
                 if (this.currentChannel !== channel) {
-                    // Remove 'down' state from all buttons
-                    this.buttons.forEach((btn) => {
-                        btn.classList.remove('down');
-                    });
-                    // Add 'down' state to the clicked button
+                    this.buttons.forEach((btn) => btn.classList.remove('down'));
                     button.classList.add('down');
-
                     this.playClickSound();
-
-                    // Change the channel source
                     this.changeChannel(channel);
                 }
             }
         });
 
-        // Load channel data from the global window.channels variable
-        if (window.channels && Array.isArray(window.channels)) {
-            window.channels.forEach(channel => {
-                if (channel.number) { // Check if channel number exists
-                    this.channels.set(channel.number, channel); // Store the whole channel object
-                } else {
-                    console.warn('Skipping channel due to missing number:', channel);
-                }
-            });
-            // console.log('Available channels loaded from window.channels:', this.channels);
-        } else {
-            console.warn("window.channels is not defined or not an array.");
-        }
+        // Load channel data from the imported array
+        channelData.forEach(channel => {
+            if (channel.number) {
+                this.channels.set(channel.number, channel);
+            } else {
+                console.warn('Skipping channel due to missing number:', channel);
+            }
+        });
+        // console.log('Available channels loaded from config:', this.channels);
     }
 
     private updateEffectsBasedOnKnob() {
