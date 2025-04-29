@@ -7,8 +7,7 @@ export async function loadWeather(lat: string, lon: string): Promise<any> {
     if (import.meta.env.MODE === 'development') {
         apiUrl = 'weather.json';
     } else {
-        // TODO: Proxy this to avoid key leakage
-        apiUrl = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${lat}%2C${lon}?unitGroup=metric&include=current&key=CZWZGWKKZEH274SCFWU2G4GJ3&contentType=json`;
+        apiUrl = `https://website-weather-proxy.chrislhow.workers.dev/?lat=${lat}&lon=${lon}`;
     }
 
     const locationResponse = await fetch(apiUrl);

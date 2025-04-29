@@ -70,7 +70,7 @@ export class TeletextEffect extends BaseCRTEffect {
             }
 
             const weatherData = await loadWeather(locationData.lat, locationData.lon);
-            const dataKeys = ['conditions', 'temp', 'feelslike', 'windspeed', 'winddir', 'humidity', 'uvindex'];
+            const dataKeys = ['conditions', 'temp', 'feelslike', 'precipprob', 'windspeed', 'winddir', 'humidity', 'uvindex'];
             dataKeys.forEach((key) => {
                 const element = this.htmlContentElement.querySelector(`.${key}`);
                 if (element && weatherData.currentConditions) {
