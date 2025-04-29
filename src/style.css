@@ -23,7 +23,17 @@ html,
 body { 
   height: 100%;
   margin: 0; 
-  font-family: 'Share Tech Mono', monospace;
+  /* font-family: 'Share Tech Mono', monospace; */
+  font-family: ui-monospace, 
+      Menlo, Monaco, 
+      "Cascadia Mono", "Segoe UI Mono", 
+      "Roboto Mono", 
+      "Oxygen Mono", 
+      "Ubuntu Mono", 
+      "Source Code Pro",
+      "Fira Mono", 
+      "Droid Sans Mono", 
+      "Consolas", "Courier New", monospace;
 }
 
 canvas#glslCanvas { 

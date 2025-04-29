@@ -1,6 +1,11 @@
 # Notes
 
 
+## TODO
+Screen is showing outside of TV during glitch, need to contain this. 
+
+
+
 ## CREDITS 
 
 Wobble and scanlines from here:
@@ -31,10 +36,10 @@ https://www.photoroom.com/tools/background-remover
 
 This link works from city name, but need to do lat/long:
 ```
-https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/santa%20cruz%20de%20la%20palma?unitGroup=us&include=current&key=CZWZGWKKZEH274SCFWU2G4GJ3&contentType=json
+https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/santa%20cruz%20de%20la%20palma?unitGroup=us&include=current&key=XXX&contentType=json
 ```
 
 Lat/long: 
 ```
-https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/28.6812%2C-17.7609?unitGroup=us&include=current&key=CZWZGWKKZEH274SCFWU2G4GJ3&contentType=json
+https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/28.6812%2C-17.7609?unitGroup=us&include=current&key=XXX&contentType=json
 ```
