@@ -22,6 +22,8 @@
 :root {
   --text-color: #213547; /* Dark blue for light mode */
   --background-color: #ffffff; /* White for light mode */
+  --link-color: #2e4b63; 
+  --link-hover-color: #457093;
 
   color: var(--text-color);
   background-color: var(--background-color);
@@ -106,6 +108,7 @@ h1 {
 .projects {
   position: relative;
   margin-bottom: 2em;
+  scroll-margin-top: 1em;
 
   & .tv {
     position: relative;
@@ -113,6 +116,10 @@ h1 {
     width: 100%;
     height: auto;
     aspect-ratio: 889/627;
+
+    >div:first-child {
+      overflow: hidden;
+    }
 
     & .channel-display-canvas {
       position: absolute;
@@ -412,12 +419,153 @@ h1 {
 	}
 }
 
+.new-tab {
+  background-color: var(--link-color);
+  mask-image: url(/new-tab.svg);
+  opacity: 0;
+
+  /* background-size: contain; */
+  display: inline-block;
+  height: 0.75em;
+  width: 0.75em;
+  vertical-align: top;
+  position: relative;
+  top: 0.1em;
+}
+
 
 .listings {
-  background-color: white;
-  color: #111;
+  font-size: 16px;
+  padding: 2em;
+  box-shadow: 5px 4px 9px 0px rgba(0,0,0,0.25);
+  /* max-width: 600px; */
+  margin: 0 auto;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
   font-family: 'Inter', sans-serif;
-  font-weight: 100;
+  font-weight: 300;
+  line-height: 1.25;
+
+  column-count: 2;
+  column-gap: 2em;
+  column-rule-width: 1px;
+  column-rule-style: solid;
+  column-rule-color: var(--text-color);  
+
+  & > div { /* Listing item */
+    /* outline: 1px #888 solid; */
+    break-inside: avoid;
+    margin-bottom: 2em;
+  }
+
+  h3, h4, p {
+    margin: 0;
+  }
+
+  button {
+    appearance: none;
+    border: none;
+    font-family: inherit;
+    display: block;
+    width: 100%;
+    text-align: left;
+    background-color: var(--text-color);
+    color: var(--background-color);
+    font-size: 1.75em;
+    line-height: 1.5;
+    font-weight: 800;
+    padding: 0 0.25em;
+    margin-bottom: 0.35em;
+    cursor: pointer;
+
+    &.active {
+      &:after {
+        content: 'On now';
+        font-size: 0.5em;
+        font-weight: 400;
+        margin-left: 1em;
+      }
+    }
+  }
+
+  h4 {
+    font-weight: 900;
+    font-size: 1.2em;
+    line-height: 1em;
+    margin-bottom: 0.2em;
+
+    & i {
+      font-style: normal;
+      font-size: 0.75em;
+      /* line-height: 0.5em; */
+      position: relative;
+      top: -0.1em;
+    }
+
+  }
+
+  p {
+    margin-bottom: 0.5em;
+    font-size: 0.9em;
+  }
+
+  .movie {
+    width: 2em;
+    height: 2.5em;
+    vertical-align: top;
+    float: left;
+    margin-right: 0.5em;
+  }
+
+  .movie-icon {
+    background-color: var(--text-color);
+    mask-image: url(/movie.svg);
+  
+    --movie-icon-size: 2.2em;
+    width: var(--movie-icon-size);
+    height: var(--movie-icon-size);
+    vertical-align: top;
+    float: left;
+    margin-right: 0.5em;
+    margin-top: 0.125em;
+  }
+
+  .credits {
+    font-size: 0.7em;
+    display: flex;
+    gap: 3em;
+    justify-content: space-between;
+    margin-bottom: 0.25em;
+
+    b {
+      display: inline-block;
+      font-weight: 600;
+      text-align: right;
+    }
+  }
+
+  .link {
+    margin-top: 0.5em;
+  }
+
+  a {
+    color: var(--link-color);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--link-hover-color);    
+    }
+
+    &:hover .new-tab {
+      background-color: var(--link-hover-color);
+      opacity: 1;
+    }
+  }
+
+
+
 }
 
 
@@ -426,7 +574,9 @@ h1 {
   :root {
     --text-color: #213547;
     --background-color: #ffffff;
-
+    --link-color: #2e4b63; 
+    --link-hover-color: #457093;
+  
     color: var(--text-color);
     background-color: var(--background-color);
   }
@@ -442,6 +592,9 @@ h1 {
   :root {
     --text-color: rgb(255, 255, 255); /* Light gray for dark mode */
     --background-color: #1a1a1a; /* Very dark gray for dark mode */
+    --link-color: #90badd; 
+    --link-hover-color: #c4ddf1;
+      
   }
 
   /* Optional: Adjust canvas background for dark mode if needed */
@@ -453,5 +606,10 @@ h1 {
 @media screen and (max-width: 600px) {
   .content {
     --content-padding: 1em;
+  }
+
+  .listings {
+    padding: 1em;
+    column-count: 1;
   }
 }

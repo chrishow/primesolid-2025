@@ -19,6 +19,7 @@ export class TV {
     private clickSound: HTMLAudioElement;
     private channelDisplayTimeout: ReturnType<typeof setTimeout> | null = null;
     private glitchTimeout: ReturnType<typeof setTimeout> | null = null; // Glitch schedule timer
+    private listingsButtons: NodeListOf<HTMLButtonElement>; // Buttons for channel listings
     private isGlitching: boolean = false; // Track if glitch animation is active
 
     // Knob related properties
@@ -38,6 +39,7 @@ export class TV {
         this.buttons = this.tvElement.querySelectorAll('.tv-case button') as NodeListOf<HTMLButtonElement>;
         this.channelDisplayCanvas = this.tvElement.querySelector('.channel-display-canvas') as HTMLCanvasElement;
         this.knobElement = this.tvElement.querySelector('.knob-spot') as HTMLElement;
+        this.listingsButtons = document.querySelectorAll('.listings button');
 
         // Instantiate the effect controllers
         this.channelDisplayEffect = new ChannelDisplayEffect(this.channelDisplayCanvas);
@@ -216,6 +218,15 @@ export class TV {
 
         this.currentChannel = channelNumber;
 
+        this.listingsButtons.forEach((button) => {
+            button.classList.remove('active');
+        });
+        document.querySelector(`.listings button[data-channel="${channelNumber}"]`)?.classList.add('active');
+
+        this.buttons.forEach((btn) => btn.classList.remove('down'));
+        document.querySelector(`.tv button[data-channel="${channelNumber}"]`)?.classList.add('down');
+
+
         if (this.channelDisplayTimeout) {
             clearTimeout(this.channelDisplayTimeout);
         }
@@ -233,12 +244,26 @@ export class TV {
             if (button) {
                 const channel = parseInt(button.dataset.channel || '1', 10);
                 if (this.currentChannel !== channel) {
-                    this.buttons.forEach((btn) => btn.classList.remove('down'));
-                    button.classList.add('down');
                     this.playClickSound();
                     this.changeChannel(channel);
                 }
             }
+        });
+
+
+        this.listingsButtons.forEach((button) => {
+            button.addEventListener('click', (e) => {
+                const channel = parseInt((e.target as HTMLButtonElement).dataset.channel || '1', 10);
+                if (this.currentChannel !== channel) {
+                    this.playClickSound();
+                    this.changeChannel(channel);
+                    // Scroll TV into view
+                    document.querySelector('.projects')!.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
+                    });
+                }
+            });
         });
 
         // Load channel data from the imported array
