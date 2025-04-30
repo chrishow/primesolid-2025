@@ -125,11 +125,11 @@ h1 {
       margin-left: 9%;
       margin-top: 9.5%;
 
-      /* > div,
+      > div,
       > canvas {
         width: 100%;
         height: 100%;
-      } */
+      }
     }
 
     & .channel-display-canvas {
@@ -454,18 +454,31 @@ h1 {
   font-weight: 300;
   line-height: 1.25;
 
-  column-count: 2;
-  column-gap: 2em;
-  column-rule-width: 1px;
-  column-rule-style: solid;
-  column-rule-color: var(--text-color);  
-
-  & > div { /* Listing item */
-    /* outline: 1px #888 solid; */
-    break-inside: avoid;
-    margin-bottom: 2em;
+  & > div {
+    column-count: 2;
+    column-gap: 2em;
+    column-rule-width: 1px;
+    column-rule-style: solid;
+    column-rule-color: var(--text-color);  
+  
+    & > div { /* Listing item */
+      /* outline: 1px #888 solid; */
+      break-inside: avoid;
+      margin-bottom: 2em;
+    }
+  
   }
 
+  h2 {
+    background-color: var(--text-color);
+    overflow: hidden;
+    width: 30%;
+    aspect-ratio: 960/227;
+    mask-image: url(/tv-listings-title.svg);
+    color: transparent;
+  }
+
+  
   h3, h4, p {
     margin: 0;
   }
