@@ -62,6 +62,24 @@ a {
   &:hover {
     color: var(--link-hover-color);    
   }
+
+  &[target='_blank'] {
+    /* text-decoration: underline; */
+    &:after {
+      content: '';
+      display: inline-block;
+      vertical-align: top;
+      width: 0.75em;
+      height: 0.75em;
+      background-color: var(--link-color);
+      mask-image: url(/new-tab.svg);
+      transition: opacity 0.25s ease-in-out;
+      margin-left: 0.15em;
+      opacity: 0.5;
+      position: relative;
+      top: 0.1em;
+    }
+  }
 }
 
 canvas#glslCanvas { 
@@ -101,9 +119,21 @@ h1, h2 {
 
 h1 {
   font-family: 'Workbench', sans-serif;
-  font-size: 2em;
+  font-size: 2.5em;
   margin: 0;
   font-weight: 400;
+}
+
+h2 {
+  margin-top: 2em;
+}
+
+h5 {
+  font-size: 1em;
+}
+
+ul {
+  padding-inline-start: 1em;
 }
 
 .content > *:not(div) {
@@ -435,21 +465,6 @@ h1 {
 	}
 }
 
-.new-tab {
-  background-color: var(--link-color);
-  mask-image: url(/new-tab.svg);
-  opacity: 0;
-
-  /* background-size: contain; */
-  display: inline-block;
-  height: 0.75em;
-  width: 0.75em;
-  vertical-align: top;
-  position: relative;
-  top: 0.1em;
-}
-
-
 .listings {
   font-size: 16px;
   padding: 2em;
@@ -481,6 +496,7 @@ h1 {
 
   h2 {
     background-color: var(--text-color);
+    margin-top: 0;
     overflow: hidden;
     width: 30%;
     aspect-ratio: 960/230;
