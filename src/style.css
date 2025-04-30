@@ -23,7 +23,7 @@
   --text-color: #213547; /* Dark blue for light mode */
   --background-color: #ffffff; /* White for light mode */
   --link-color: #2e4b63; 
-  --link-hover-color: #457093;
+  --link-hover-color: #314f67;
 
   color: var(--text-color);
   background-color: var(--background-color);
@@ -52,6 +52,16 @@ body {
       "Fira Mono", 
       "Droid Sans Mono", 
       "Consolas", "Courier New", monospace;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+  transition: color 0.25s ease-in-out;
+
+  &:hover {
+    color: var(--link-hover-color);    
+  }
 }
 
 canvas#glslCanvas { 
@@ -593,14 +603,14 @@ h1 {
   :root {
     --text-color: #213547;
     --background-color: #ffffff;
-    --link-color: #2e4b63; 
-    --link-hover-color: #457093;
-  
+    --link-color: #3f6787; 
+    --link-hover-color: #456580;
+    
     color: var(--text-color);
     background-color: var(--background-color);
   }
   a:hover {
-    color: #747bff;
+    color: var(--link-hover-color);
   }
   button {
     background-color: #f9f9f9;
