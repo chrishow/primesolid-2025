@@ -1,6 +1,6 @@
-import { BaseCRTEffect } from './baseCrtEffect';
+import { BaseCrtEffect } from './BaseCrtEffect';
 
-export class ChannelDisplayEffect extends BaseCRTEffect {
+export class ChannelDisplayEffect extends BaseCrtEffect {
     private textCanvas: HTMLCanvasElement;
     private textCtx: CanvasRenderingContext2D;
     private currentText: string = '';

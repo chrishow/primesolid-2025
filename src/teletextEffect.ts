@@ -1,10 +1,10 @@
-import { BaseCRTEffect } from './baseCrtEffect';
+import { BaseCrtEffect } from './BaseCrtEffect';
 import { loadLocation } from './loadLocation';
 import { loadWeather } from './loadWeather';
 
 import teletextStyle from './teletext.css?inline';
 
-export class TeletextEffect extends BaseCRTEffect {
+export class TeletextEffect extends BaseCrtEffect {
     // HTML/SVG rendering related properties
     private htmlContentElement: HTMLElement;
     private htmlCanvas: HTMLCanvasElement;

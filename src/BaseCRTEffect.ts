@@ -1,7 +1,7 @@
 import vertexShaderSource from './shaders/channel-display.vert?raw';
 import fragmentShaderSource from './shaders/channel-display.frag?raw';
 
-export abstract class BaseCRTEffect {
+export abstract class BaseCrtEffect {
     protected canvas: HTMLCanvasElement;
     protected gl: WebGLRenderingContext;
     protected program: WebGLProgram;
