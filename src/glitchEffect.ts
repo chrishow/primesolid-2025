@@ -1,5 +1,5 @@
 // --- Glitch Text Effect ---
-const glitchChars = '0123456789';
+const glitchChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 // Map to store active interval IDs for glitching elements
 const activeGlitches = new Map<HTMLElement, number>();
@@ -56,8 +56,8 @@ function glitchText(element: HTMLElement, intensity: number = 0.1, duration: num
                 const originalText = data.originalValue;
                 let newText = '';
                 for (let i = 0; i < originalText.length; i++) {
-                    // Apply glitch based on intensity, avoiding spaces/newlines
-                    if (Math.random() < intensity && originalText[i] !== ' ' && originalText[i] !== '\\n') {
+                    // Only apply glitch to alphabetical characters
+                    if (Math.random() < intensity && /[a-zA-Z]/.test(originalText[i])) {
                         newText += getRandomChar(glitchChars);
                     } else {
                         newText += originalText[i];
