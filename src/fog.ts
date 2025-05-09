@@ -41,22 +41,38 @@ export function setupFog(canvas: HTMLCanvasElement, fragmentSource: string) {
         sandbox.setUniform('u_highlightColor', ...hexToRgbNormalized(colors.highlight));
     };
 
-    // Check initial color scheme
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    if (darkModeMediaQuery.matches) {
-        setShaderColors(darkModeColors);
-    } else {
-        setShaderColors(lightModeColors);
-    }
+    // Listen for custom theme changes
+    document.addEventListener('themechanged', (e: Event) => {
+        const event = e as CustomEvent;
+        const theme = event.detail.theme;
+        if (theme === 'dark') {
+            setShaderColors(darkModeColors);
+        } else if (theme === 'light') {
+            setShaderColors(lightModeColors);
+        } else { // 'auto' or unspecified
+            const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            if (darkModeMediaQuery.matches) {
+                setShaderColors(darkModeColors);
+            } else {
+                setShaderColors(lightModeColors);
+            }
+        }
+    });
 
-    // Listen for changes in color scheme
-    darkModeMediaQuery.addEventListener('change', (e) => {
-        if (e.matches) {
+    // Initial theme setup based on current preference (including 'auto')
+    const initialTheme = localStorage.getItem('theme-preference') || 'auto';
+    if (initialTheme === 'dark') {
+        setShaderColors(darkModeColors);
+    } else if (initialTheme === 'light') {
+        setShaderColors(lightModeColors);
+    } else { // 'auto'
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        if (darkModeMediaQuery.matches) {
             setShaderColors(darkModeColors);
         } else {
             setShaderColors(lightModeColors);
         }
-    });
+    }
 
     // Add the 'visible' class to trigger the fade-in after setup
     canvas.classList.add('visible');

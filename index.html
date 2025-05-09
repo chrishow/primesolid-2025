@@ -9,6 +9,18 @@
     <script type="module" defer src="/src/main.ts"></script>
   </head>
   <body>
+    <div id="theme-switcher">
+      <button id="theme-toggle-button" aria-label="Toggle theme" title="Change theme">
+        <span class="icon-auto">A</span>
+        <span class="icon-light" style="display:none;">L</span>
+        <span class="icon-dark" style="display:none;">D</span>
+      </button>
+      <div id="theme-menu" class="hidden">
+        <button data-theme="auto"><span class="icon-auto">A</span> Auto</button>
+        <button data-theme="light"><span class="icon-light">L</span> Light</button>
+        <button data-theme="dark"><span class="icon-dark">D</span> Dark</button>
+      </div>
+    </div>
     <canvas id="glslCanvas"></canvas>
 
     <div class=content>

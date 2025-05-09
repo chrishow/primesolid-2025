@@ -20,13 +20,40 @@
 
 
 :root {
-  --text-color: #213547; /* Dark blue for light mode */
-  --background-color: #ffffff; /* White for light mode */
-  --link-color: #2e4b63; 
-  --link-hover-color: #314f67;
+  --dark-text-color: rgb(255, 255, 255);
+  --dark-background-color: #1a1a1a;
+  --dark-link-color: #90badd; 
+  --dark-link-hover-color: #c4ddf1;
+
+  --light-text-color: #213547;
+  --light-background-color: #ffffff;
+  --light-link-color: #2e4b63; 
+  --light-link-hover-color: #314f67;
+
+  /* Default to light theme */
+  --text-color: var(--light-text-color);
+  --background-color: var(--light-background-color);
+  --link-color: var(--light-link-color);
+  --link-hover-color: var(--light-link-hover-color);
+
 
   color: var(--text-color);
   background-color: var(--background-color);
+}
+
+/* Apply theme from data-theme attribute */
+html[data-theme='light'] {
+  --text-color: var(--light-text-color);
+  --background-color: var(--light-background-color);
+  --link-color: var(--light-link-color);
+  --link-hover-color: var(--light-link-hover-color);
+}
+
+html[data-theme='dark'] {
+  --text-color: var(--dark-text-color) !important;
+  --background-color: var(--dark-background-color) !important;
+  --link-color: var(--dark-link-color) !important;
+  --link-hover-color: var(--dark-link-hover-color) !important;
 }
 
 /* Border box all the things */
@@ -613,17 +640,86 @@ ul {
 
 }
 
+/* Theme Switcher */
+#theme-switcher {
+  position: fixed;
+  top: 1em;
+  right: 1em;
+  z-index: 1000;
+}
+
+#theme-toggle-button {
+  background: none;
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 0.5em;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+#theme-toggle-button .icon-auto,
+#theme-toggle-button .icon-light,
+#theme-toggle-button .icon-dark {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  text-align: center;
+}
+
+
+#theme-menu {
+  position: absolute;
+  top: calc(100% + 0.5em);
+  right: 0;
+  /* background-color: var(--background-color); */
+  border: 1px solid var(--text-color);
+  border-radius: 5px;
+  padding: 0.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+#theme-menu.hidden {
+  display: none;
+}
+
+#theme-menu button {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 0.5em;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 1em;
+}
+
+#theme-menu button:hover {
+  background-color: var(--link-hover-color);
+  color: var(--background-color);
+}
+
+#theme-menu button .icon-auto,
+#theme-menu button .icon-light,
+#theme-menu button .icon-dark {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  text-align: center;
+}
 
 
 @media (prefers-color-scheme: light) {
   :root {
-    --text-color: #213547;
-    --background-color: #ffffff;
-    --link-color: #3f6787; 
-    --link-hover-color: #456580;
-    
-    color: var(--text-color);
-    background-color: var(--background-color);
+    --text-color: var(--light-text-color);
+    --background-color: var(--light-background-color);
+    --link-color: var(--light-link-color);
+    --link-hover-color: var(--light-link-hover-color);
+  
   }
   a:hover {
     color: var(--link-hover-color);
@@ -635,17 +731,11 @@ ul {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text-color: rgb(255, 255, 255); /* Light gray for dark mode */
-    --background-color: #1a1a1a; /* Very dark gray for dark mode */
-    --link-color: #90badd; 
-    --link-hover-color: #c4ddf1;
-      
+    --text-color: var(--dark-text-color);
+    --background-color: var(--dark-background-color);
+    --link-color: var(--dark-link-color);
+    --link-hover-color: var(--dark-link-hover-color);
   }
-
-  /* Optional: Adjust canvas background for dark mode if needed */
-  /* canvas {
-    background-color: #111; 
-  } */
 }
 
 @media screen and (max-width: 600px) {
