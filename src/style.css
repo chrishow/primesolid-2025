@@ -86,6 +86,10 @@ body {
       "Consolas", "Courier New", monospace;
 }
 
+button {
+  font-family: inherit;
+}
+
 a {
   color: var(--link-color);
   text-decoration: none;
@@ -701,11 +705,6 @@ ul {
   gap: 0.5em;
   font-size: 1em;
 }
-
-/* #theme-menu button:hover {
-  background-color: var(--link-hover-color);
-  color: var(--background-color);
-} */
 
 #theme-menu button .icon-auto,
 #theme-menu button .icon-light,
