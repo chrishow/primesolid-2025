@@ -56,6 +56,11 @@ html[data-theme='dark'] {
   --link-hover-color: var(--dark-link-hover-color) !important;
 }
 
+/* Make icons in theme switcher white in dark mode */
+html[data-theme='dark'] #theme-switcher img {
+  filter: brightness(0) invert(1);
+}
+
 /* Border box all the things */
 html {
   box-sizing: border-box;
@@ -664,9 +669,8 @@ ul {
   display: inline-block;
   width: 1em;
   height: 1em;
-  text-align: center;
+  vertical-align: middle; /* Align icons better with text if any */
 }
-
 
 #theme-menu {
   position: absolute;
@@ -698,10 +702,10 @@ ul {
   font-size: 1em;
 }
 
-#theme-menu button:hover {
+/* #theme-menu button:hover {
   background-color: var(--link-hover-color);
   color: var(--background-color);
-}
+} */
 
 #theme-menu button .icon-auto,
 #theme-menu button .icon-light,
@@ -709,7 +713,7 @@ ul {
   display: inline-block;
   width: 1em;
   height: 1em;
-  text-align: center;
+  vertical-align: middle; /* Align icons better with text */
 }
 
 

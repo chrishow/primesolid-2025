@@ -18,9 +18,11 @@ new TV();
 // Theme switcher logic
 const themeToggleButton = document.getElementById('theme-toggle-button') as HTMLButtonElement | null;
 const themeMenu = document.getElementById('theme-menu') as HTMLDivElement | null;
-const iconAuto = themeToggleButton?.querySelector('.icon-auto') as HTMLElement | null;
-const iconLight = themeToggleButton?.querySelector('.icon-light') as HTMLElement | null;
-const iconDark = themeToggleButton?.querySelector('.icon-dark') as HTMLElement | null;
+
+// Get icon elements by their class within the toggle button
+const iconAuto = themeToggleButton?.querySelector('.icon-auto') as HTMLImageElement | null;
+const iconLight = themeToggleButton?.querySelector('.icon-light') as HTMLImageElement | null;
+const iconDark = themeToggleButton?.querySelector('.icon-dark') as HTMLImageElement | null;
 
 const THEME_KEY = 'theme-preference';
 
