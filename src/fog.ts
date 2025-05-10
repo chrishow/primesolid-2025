@@ -41,21 +41,48 @@ export function setupFog(canvas: HTMLCanvasElement, fragmentSource: string) {
         sandbox.setUniform('u_highlightColor', ...hexToRgbNormalized(colors.highlight));
     };
 
-    // Listen for custom theme changes
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    let boundOsThemeChangeListener: ((e: MediaQueryListEvent) => void) | null = null;
+
+    // Function to apply colors based on an OS theme change event or current state
+    const handleOsThemeChange = (eventOrState: MediaQueryListEvent | { matches: boolean }) => {
+        if (eventOrState.matches) {
+            setShaderColors(darkModeColors);
+        } else {
+            setShaderColors(lightModeColors);
+        }
+    };
+
+    // Enables listening to OS theme changes and applies current OS theme
+    const enableAutoThemeUpdates = () => {
+        handleOsThemeChange(darkModeMediaQuery); // Apply current OS theme immediately
+        if (boundOsThemeChangeListener) { // Remove any existing listener first
+            darkModeMediaQuery.removeEventListener('change', boundOsThemeChangeListener);
+        }
+        boundOsThemeChangeListener = (e) => handleOsThemeChange(e); // Create new bound listener
+        darkModeMediaQuery.addEventListener('change', boundOsThemeChangeListener);
+    };
+
+    // Disables listening to OS theme changes
+    const disableAutoThemeUpdates = () => {
+        if (boundOsThemeChangeListener) {
+            darkModeMediaQuery.removeEventListener('change', boundOsThemeChangeListener);
+            boundOsThemeChangeListener = null;
+        }
+    };
+
+    // Listen for custom theme changes from main.ts (user interaction with theme switcher)
     document.addEventListener('themechanged', (e: Event) => {
         const event = e as CustomEvent;
         const theme = event.detail.theme;
         if (theme === 'dark') {
+            disableAutoThemeUpdates();
             setShaderColors(darkModeColors);
         } else if (theme === 'light') {
+            disableAutoThemeUpdates();
             setShaderColors(lightModeColors);
-        } else { // 'auto' or unspecified
-            const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            if (darkModeMediaQuery.matches) {
-                setShaderColors(darkModeColors);
-            } else {
-                setShaderColors(lightModeColors);
-            }
+        } else { // 'auto'
+            enableAutoThemeUpdates();
         }
     });
 
@@ -63,15 +90,12 @@ export function setupFog(canvas: HTMLCanvasElement, fragmentSource: string) {
     const initialTheme = localStorage.getItem('theme-preference') || 'auto';
     if (initialTheme === 'dark') {
         setShaderColors(darkModeColors);
+        // OS listener not needed for explicit dark theme
     } else if (initialTheme === 'light') {
         setShaderColors(lightModeColors);
+        // OS listener not needed for explicit light theme
     } else { // 'auto'
-        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        if (darkModeMediaQuery.matches) {
-            setShaderColors(darkModeColors);
-        } else {
-            setShaderColors(lightModeColors);
-        }
+        enableAutoThemeUpdates(); // Apply current OS theme and start listening for OS changes
     }
 
     // Add the 'visible' class to trigger the fade-in after setup
