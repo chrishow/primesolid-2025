@@ -1,6 +1,6 @@
 import { generateVCRNoise, setVCRNoiseIntensity } from './vcrNoise';
-import { ChannelDisplayEffect } from './channelDisplayEffect';
-import { TeletextEffect } from './teletextEffect';
+import { ChannelDisplayEffect } from './ChannelDisplayEffect';
+import { TeletextEffect } from './TeletextEffect';
 import { channels as channelData, ChannelConfig } from './channelConfig'; // Import config
 
 

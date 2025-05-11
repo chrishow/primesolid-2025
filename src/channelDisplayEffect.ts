@@ -1,4 +1,4 @@
-import { BaseCrtEffect } from './baseCrtEffect';
+import { BaseCrtEffect } from './BaseCrtEffect';
 
 export class ChannelDisplayEffect extends BaseCrtEffect {
     private textCanvas: HTMLCanvasElement;
