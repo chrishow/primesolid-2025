@@ -1,4 +1,4 @@
-import { BaseCrtEffect } from './BaseCrtEffect';
+import { BaseCrtEffect } from './baseCrtEffect';
 import { loadLocation } from './loadLocation';
 import { loadWeather } from './loadWeather';
 
