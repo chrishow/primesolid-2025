@@ -9,18 +9,6 @@
     <script type="module" defer src="/src/main.ts"></script>
   </head>
   <body>
-    <div id="theme-switcher">
-      <button id="theme-toggle-button" aria-label="Toggle theme" title="Change theme">
-        <img src="/public/theme-icon-auto.svg" alt="Auto theme" class="icon-auto" />
-        <img src="/public/theme-icon-light.svg" alt="Light theme" class="icon-light" style="display:none;" />
-        <img src="/public/theme-icon-dark.svg" alt="Dark theme" class="icon-dark" style="display:none;" />
-      </button>
-      <div id="theme-menu" class="hidden">
-        <button data-theme="auto"><img src="/public/theme-icon-auto.svg" alt="Auto theme" class="icon-auto" /> Auto</button>
-        <button data-theme="light"><img src="/public/theme-icon-light.svg" alt="Light theme" class="icon-light" /> Light</button>
-        <button data-theme="dark"><img src="/public/theme-icon-dark.svg" alt="Dark theme" class="icon-dark" /> Dark</button>
-      </div>
-    </div>
     <canvas id="glslCanvas"></canvas>
 
     <div class=content>

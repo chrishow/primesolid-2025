@@ -1,0 +1,107 @@
+/* Theme Switcher */
+#theme-switcher {
+  position: fixed;
+  top: 1em;
+  right: 1em;
+  z-index: 1000;
+}
+
+#theme-toggle-button {
+  background: none;
+  /* border: 1px solid var(--text-color); */
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 0.5em;
+  border-radius: 5px;
+  font-size: 1em;
+  background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white background */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
+  -webkit-backdrop-filter: blur(10px); /* For Safari */
+}
+
+#theme-toggle-button .icon-auto,
+#theme-toggle-button .icon-light,
+#theme-toggle-button .icon-dark {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle; /* Align icons better with text if any */
+}
+
+#theme-menu {
+  position: absolute;
+  top: calc(100% + 0.25em);
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white background */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
+  -webkit-backdrop-filter: blur(10px); /* For Safari */
+  /* border: 1px solid var(--text-color); */
+  border: none;
+  border-radius: 5px;
+  padding: 0.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+#theme-menu.hidden {
+  display: none;
+}
+
+#theme-menu button {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 0.5em;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 1em;
+}
+
+#theme-menu button .icon-auto,
+#theme-menu button .icon-light,
+#theme-menu button .icon-dark {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle; /* Align icons better with text */
+}
+
+/* Hover effect for theme menu buttons */
+#theme-menu button:hover {
+  color: var(--link-hover-color); /* Changes text and SVG icon color */
+}
+
+/* Default hover for icons in theme menu (targets light mode / auto-light) */
+/* Converts black SVG to var(--light-link-hover-color) #314f67 */
+#theme-menu button:hover img {
+  filter: invert(26%) sepia(15%) saturate(1357%) hue-rotate(161deg) brightness(93%) contrast(87%);
+}
+
+/* In dark mode, hovered icons in the menu should use the direct hover color, not be inverted */
+html[data-theme='dark'] #theme-menu button:hover img {
+  /* This filter converts black to #c4ddf1 (var(--dark-link-hover-color)) */
+  filter: invert(77%) sepia(11%) saturate(1078%) hue-rotate(179deg) brightness(96%) contrast(91%);
+}
+
+/* Make icons in theme switcher white in dark mode */
+html[data-theme='dark'] #theme-switcher img {
+  filter: brightness(0) invert(1); /* Ensures original black SVG becomes white */
+}
+
+/* Ensure icons are white in auto mode when OS is dark */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) #theme-switcher img {
+    filter: brightness(0) invert(1);
+  }
+
+  /* Ensure icon hover color is correct in auto mode when OS is dark */
+  html:not([data-theme]) #theme-menu button:hover img {
+    /* This filter converts black to #c4ddf1 (var(--dark-link-hover-color)) */
+    filter: invert(77%) sepia(11%) saturate(1078%) hue-rotate(179deg) brightness(96%) contrast(91%);
+  }
+}
