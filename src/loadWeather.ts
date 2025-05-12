@@ -1,13 +1,13 @@
 
 
 
-export async function loadWeather(lat: string, lon: string): Promise<any> {
+export async function loadWeather(): Promise<any> {
     let apiUrl = '';
     // console.log('import.meta.env.MODE', import.meta.env.MODE);
     if (import.meta.env.MODE === 'development') {
         apiUrl = 'weather.json';
     } else {
-        apiUrl = `https://website-weather-proxy.chrislhow.workers.dev/?lat=${lat}&lon=${lon}`;
+        apiUrl = `https://website-weather-proxy.chrislhow.workers.dev/`;
     }
 
     const locationResponse = await fetch(apiUrl);

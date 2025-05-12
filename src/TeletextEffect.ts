@@ -1,5 +1,4 @@
 import { BaseCrtEffect } from './BaseCrtEffect';
-import { loadLocation } from './loadLocation';
 import { loadWeather } from './loadWeather';
 
 import teletextStyle from './teletext.css?inline';
@@ -63,14 +62,13 @@ export class TeletextEffect extends BaseCrtEffect {
             }
 
             // Get location and weather data
-            const locationData = await loadLocation();
-            const locationElement = this.htmlContentElement.querySelector('.location');
-            if (locationElement) {
-                locationElement.textContent = locationData.city;
+            const weatherData = await loadWeather();
+
+            if (weatherData.city) {
+                this.htmlContentElement.querySelector('.city')!.textContent = weatherData.city;
             }
 
-            const weatherData = await loadWeather(locationData.lat, locationData.lon);
-            const dataKeys = ['conditions', 'temp', 'feelslike', 'precipprob', 'windspeed', 'winddir', 'humidity', 'uvindex'];
+            const dataKeys = ['conditions', 'temp', 'precipprob', 'windspeed', 'winddir', 'humidity', 'uvindex'];
             dataKeys.forEach((key) => {
                 const element = this.htmlContentElement.querySelector(`.${key}`);
                 if (element && weatherData.currentConditions) {
