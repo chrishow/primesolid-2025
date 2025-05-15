@@ -138,6 +138,11 @@ canvas#glslCanvas {
   &.visible {
     opacity: 1;
   }
+
+  /* Try to fix phone background issue */
+  height: 100vh; /* Fallback for older browsers */
+  height: 100dvh; /* This should adapt to the visible viewport height */
+  width: 100vw; /* Assuming you want full width as well */
 }
 
 
