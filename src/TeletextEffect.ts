@@ -12,6 +12,7 @@ export class TeletextEffect extends BaseCrtEffect {
 
     private isContentLoaded: boolean = false;
     private isLoadingContent: boolean = false; // Prevent multiple loads
+    private needsDelayedSafariUpdate: boolean;
 
     constructor(canvas: HTMLCanvasElement) {
         super(canvas); // Call base class constructor
@@ -35,6 +36,9 @@ export class TeletextEffect extends BaseCrtEffect {
 
         // Image element to load the SVG data URI
         this.svgImage = new Image();
+
+        // Initialize Safari-specific flag
+        this.needsDelayedSafariUpdate = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
 
         // Load external HTML content asynchronously
         this.loadHtmlContent('/teletext.html');
@@ -127,11 +131,23 @@ export class TeletextEffect extends BaseCrtEffect {
             this.htmlCtx.drawImage(this.svgImage, 0, 0, this.htmlCanvas.width, this.htmlCanvas.height);
 
             // 5. Upload 2D canvas to WebGL texture using base class method
-            this.uploadTexture(this.htmlCanvas);
+            this.uploadTexture(this.htmlCanvas); // This might set textureNeedsUpdate = false
 
             // If visible, trigger a re-render immediately after texture update
             if (this.isVisible) {
                 this.render();
+            }
+
+            // Safari-specific: attempt a delayed re-render on first successful load after show
+            if (this.needsDelayedSafariUpdate) {
+                this.needsDelayedSafariUpdate = false; // Consume the flag for this show cycle
+                setTimeout(() => {
+                    if (this.isVisible && this.isContentLoaded) { // Check if still relevant
+                        console.log("Safari: Attempting delayed re-render of Teletext content.");
+                        this.textureNeedsUpdate = true; // Ensure the update isn't skipped
+                        this.updateTextureContent();
+                    }
+                }, 100); // 100ms delay
             }
         };
         this.svgImage.onerror = (err) => {
@@ -151,10 +167,14 @@ export class TeletextEffect extends BaseCrtEffect {
     }
 
     // Override hide if specific cleanup is needed, otherwise base class is fine
-    // public hide(): void {
-    //     super.hide();
-    //     // Add any specific cleanup for TeletextEffect here
-    // }
+    public hide(): void {
+        super.hide();
+        // If it's Safari, reset the flag so the delayed update occurs on next show
+        if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+            this.needsDelayedSafariUpdate = true;
+        }
+        // Add any specific cleanup for TeletextEffect here
+    }
 
     // Override resize if HTML/SVG rendering depends on size, otherwise base class is fine
     // protected resize(): void {

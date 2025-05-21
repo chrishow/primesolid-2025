@@ -34,7 +34,7 @@ export class ChannelDisplayEffect extends BaseCrtEffect {
 
         // Style the text (match CSS if possible)
         ctx.fillStyle = 'lime';
-        ctx.font = 'bold 36px "Share Tech Mono", monospace'; // Adjust size/family
+        ctx.font = 'bold 36px "Menlo", monospace'; // Adjust size/family
         // Align text to top-left
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
