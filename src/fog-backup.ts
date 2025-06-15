@@ -32,32 +32,52 @@ const darkModeColors = {
 };
 
 export function setupFog(canvas: HTMLCanvasElement) {
-    // Ensure canvas has correct dimensions before initializing shader
-    const ensureCanvasSize = () => {
-        const rect = canvas.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-            // Set canvas internal resolution to match display size
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-        }
+    // Get device pixel ratio for high-DPI displays
+    const pixelRatio = window.devicePixelRatio || 1;
+    
+    // Set canvas display size to match container
+    const rect = canvas.getBoundingClientRect();
+    const displayWidth = rect.width;
+    const displayHeight = rect.height;
+    
+    // Set canvas internal resolution (fixed high resolution)
+    const resolution = Math.min(2048, Math.max(displayWidth, displayHeight) * pixelRatio);
+    canvas.width = resolution;
+    canvas.height = Math.round(resolution * (displayHeight / displayWidth));
+    
+    // Set CSS size to match display
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = displayHeight + 'px';
+    
+    const sandbox = new GlslCanvas(canvas);
+    sandbox.load(fragmentSource);
+    
+    // Prevent GlslCanvas from changing resolution on resize
+    let resizeObserver: ResizeObserver | null = null;
+    
+    // Handle resize manually to maintain consistent quality
+    const handleResize = () => {
+        const newRect = canvas.getBoundingClientRect();
+        const newDisplayWidth = newRect.width;
+        const newDisplayHeight = newRect.height;
+        
+        // Only update CSS size, keep internal resolution fixed for quality
+        canvas.style.width = newDisplayWidth + 'px';
+        canvas.style.height = newDisplayHeight + 'px';
+        
+        // Update GlslCanvas uniforms for new aspect ratio
+        sandbox.setUniform('u_resolution', canvas.width, canvas.height);
     };
-
-    // Set initial size
-    ensureCanvasSize();
-
-    // Use requestAnimationFrame to ensure layout is complete
-    requestAnimationFrame(() => {
-        ensureCanvasSize(); // Double-check size after layout
-
-        const sandbox = new GlslCanvas(canvas);
-        sandbox.load(fragmentSource);
-
-        // Move all the shader setup code inside this callback
-        setupShaderFunctionality(sandbox, canvas);
-    });
-}
-
-function setupShaderFunctionality(sandbox: any, canvas: HTMLCanvasElement) {
+    
+    // Use ResizeObserver for better performance
+    if (window.ResizeObserver) {
+        resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(canvas);
+    } else {
+        // Fallback to window resize event
+        window.addEventListener('resize', handleResize);
+    }
+    sandbox.load(fragmentSource);
 
     const setShaderColors = (colors: typeof lightModeColors) => {
         sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(colors.base));

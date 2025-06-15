@@ -60,12 +60,22 @@ float fbm ( in vec2 _st) {
 }
 
 void main() {
-    // Original normalized coordinates (0.0 to 1.0)
-    vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-    vec2 st = uv;
-
-    // Scale the coordinates for the effect
-    st *= 3.0; // You might adjust this scaling factor
+    // Normalized coordinates
+    vec2 st = gl_FragCoord.xy / u_resolution.xy;
+    
+    // Fix aspect ratio to prevent squashing
+    // Make coordinates square by adjusting for aspect ratio
+    float aspectRatio = u_resolution.x / u_resolution.y;
+    if (aspectRatio > 1.0) {
+        // Wider than tall - adjust x coordinate
+        st.x = (st.x - 0.5) * aspectRatio + 0.5;
+    } else {
+        // Taller than wide - adjust y coordinate  
+        st.y = (st.y - 0.5) / aspectRatio + 0.5;
+    }
+    
+    // Scale for the fog effect
+    st *= 3.0;
 
     vec3 color = vec3(0.0);
 

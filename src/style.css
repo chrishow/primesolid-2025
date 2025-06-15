@@ -589,7 +589,7 @@ ul {
     font-weight: 900;
     font-size: 1.2em;
     line-height: 1em;
-    margin-bottom: 0.2em;
+    margin-bottom: 0.4em;
 
     & i {
       font-style: normal;
@@ -693,6 +693,10 @@ ul {
     --content-padding: 1em;
   }
 
+  h1 {
+    font-size: 8vw;
+  }
+
   .listings {
     padding: 0.75em;
 
@@ -708,4 +712,14 @@ ul {
       column-count: 1;
     }
   }
+
+  @keyframes wobbly {
+    0% {
+      transform: translateY(0.5px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
 }

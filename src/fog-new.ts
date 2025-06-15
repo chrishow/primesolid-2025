@@ -32,32 +32,8 @@ const darkModeColors = {
 };
 
 export function setupFog(canvas: HTMLCanvasElement) {
-    // Ensure canvas has correct dimensions before initializing shader
-    const ensureCanvasSize = () => {
-        const rect = canvas.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-            // Set canvas internal resolution to match display size
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-        }
-    };
-
-    // Set initial size
-    ensureCanvasSize();
-
-    // Use requestAnimationFrame to ensure layout is complete
-    requestAnimationFrame(() => {
-        ensureCanvasSize(); // Double-check size after layout
-
-        const sandbox = new GlslCanvas(canvas);
-        sandbox.load(fragmentSource);
-
-        // Move all the shader setup code inside this callback
-        setupShaderFunctionality(sandbox, canvas);
-    });
-}
-
-function setupShaderFunctionality(sandbox: any, canvas: HTMLCanvasElement) {
+    const sandbox = new GlslCanvas(canvas);
+    sandbox.load(fragmentSource);
 
     const setShaderColors = (colors: typeof lightModeColors) => {
         sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(colors.base));
