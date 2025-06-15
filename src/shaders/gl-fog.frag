@@ -67,13 +67,14 @@ void main() {
     float aspect = u_resolution.x / u_resolution.y;
     vec2 st = uv;
 
-    // Adjust coordinates to maintain aspect ratio (centered)
+    // Fix aspect ratio correction for fog effect
+    // We want to maintain the same "density" of fog pattern regardless of screen shape
     if (aspect > 1.0) {
-        // Wider than tall: scale x
-        st.x = (st.x - 0.5) * aspect + 0.5;
+        // Wider than tall: compress x to maintain pattern density
+        st.x = (st.x - 0.5) / aspect + 0.5;
     } else {
-        // Taller than wide (or square): scale y
-        st.y = (st.y - 0.5) / aspect + 0.5;
+        // Taller than wide: compress y to maintain pattern density  
+        st.y = (st.y - 0.5) * aspect + 0.5;
     }
 
     // Scale the corrected coordinates for the effect

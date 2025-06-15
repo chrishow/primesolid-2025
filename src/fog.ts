@@ -1,3 +1,4 @@
+import fragmentSource from './shaders/gl-fog.frag?raw';
 import GlslCanvas from 'glslCanvas';
 
 // Helper function to convert hex color to normalized RGB array
@@ -30,7 +31,7 @@ const darkModeColors = {
     highlight: '#8d99ae' // Darker Gray (Cloud Highlight/Moonlight - was #adb5bd)
 };
 
-export function setupFog(canvas: HTMLCanvasElement, fragmentSource: string) {
+export function setupFog(canvas: HTMLCanvasElement) {
     const sandbox = new GlslCanvas(canvas);
     sandbox.load(fragmentSource);
 
