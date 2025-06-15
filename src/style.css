@@ -31,12 +31,12 @@
 
 :root {
   --dark-text-color: rgb(255, 255, 255);
-  --dark-background-color: #1a1a1a;
+  --dark-background-color: #1c2541;
   --dark-link-color: #90badd; 
   --dark-link-hover-color: #c4ddf1;
 
   --light-text-color: #213547;
-  --light-background-color: #ffffff;
+  --light-background-color: #6495ED;
   --light-link-color: #2e4b63; 
   --light-link-hover-color: #314f67;
 
@@ -138,7 +138,7 @@ canvas#glslCanvas {
   left: 0;
   z-index: -1;
   display: block; 
-  background-color: black;
+  background-color: var(--background-color);
   width: 100%;
   height: 100lvh; /* Fill screen on phones even when scrolled */
   opacity: 0;
@@ -675,7 +675,7 @@ body.error-404 {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    text-align: center;
   }
 }
 

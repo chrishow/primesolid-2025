@@ -32,6 +32,18 @@ const darkModeColors = {
 };
 
 export function setupFog(canvas: HTMLCanvasElement) {
+    // Set canvas background color immediately to match body background
+    const setCanvasBackgroundColor = () => {
+        const computedStyle = getComputedStyle(document.documentElement);
+        const bgColor = computedStyle.getPropertyValue('--background-color').trim();
+        if (bgColor) {
+            canvas.style.backgroundColor = bgColor;
+        }
+    };
+
+    // Set initial background color before any setup
+    setCanvasBackgroundColor();
+
     // Ensure canvas has correct dimensions before initializing shader
     const ensureCanvasSize = () => {
         const rect = canvas.getBoundingClientRect();
@@ -52,6 +64,28 @@ export function setupFog(canvas: HTMLCanvasElement) {
         const sandbox = new GlslCanvas(canvas);
         sandbox.load(fragmentSource);
 
+        // Set initial theme colors immediately after shader loads
+        const initialTheme = localStorage.getItem('theme-preference') || 'auto';
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+        if (initialTheme === 'dark') {
+            sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(darkModeColors.base));
+            sandbox.setUniform('u_lowlightColor', ...hexToRgbNormalized(darkModeColors.lowlight));
+            sandbox.setUniform('u_midtoneColor', ...hexToRgbNormalized(darkModeColors.midtone));
+            sandbox.setUniform('u_highlightColor', ...hexToRgbNormalized(darkModeColors.highlight));
+        } else if (initialTheme === 'light') {
+            sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(lightModeColors.base));
+            sandbox.setUniform('u_lowlightColor', ...hexToRgbNormalized(lightModeColors.lowlight));
+            sandbox.setUniform('u_midtoneColor', ...hexToRgbNormalized(lightModeColors.midtone));
+            sandbox.setUniform('u_highlightColor', ...hexToRgbNormalized(lightModeColors.highlight));
+        } else { // 'auto'
+            const colors = darkModeMediaQuery.matches ? darkModeColors : lightModeColors;
+            sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(colors.base));
+            sandbox.setUniform('u_lowlightColor', ...hexToRgbNormalized(colors.lowlight));
+            sandbox.setUniform('u_midtoneColor', ...hexToRgbNormalized(colors.midtone));
+            sandbox.setUniform('u_highlightColor', ...hexToRgbNormalized(colors.highlight));
+        }
+
         // Move all the shader setup code inside this callback
         setupShaderFunctionality(sandbox, canvas);
     });
@@ -59,11 +93,22 @@ export function setupFog(canvas: HTMLCanvasElement) {
 
 function setupShaderFunctionality(sandbox: any, canvas: HTMLCanvasElement) {
 
+    // Helper function to update canvas background color
+    const updateCanvasBackground = () => {
+        const computedStyle = getComputedStyle(document.documentElement);
+        const bgColor = computedStyle.getPropertyValue('--background-color').trim();
+        if (bgColor) {
+            canvas.style.backgroundColor = bgColor;
+        }
+    };
+
     const setShaderColors = (colors: typeof lightModeColors) => {
         sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(colors.base));
         sandbox.setUniform('u_lowlightColor', ...hexToRgbNormalized(colors.lowlight));
         sandbox.setUniform('u_midtoneColor', ...hexToRgbNormalized(colors.midtone));
         sandbox.setUniform('u_highlightColor', ...hexToRgbNormalized(colors.highlight));
+        // Update canvas background when colors change
+        updateCanvasBackground();
     };
 
     const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -124,7 +169,10 @@ function setupShaderFunctionality(sandbox: any, canvas: HTMLCanvasElement) {
     }
 
     // Add the 'visible' class to trigger the fade-in after setup
-    canvas.classList.add('visible');
+    // Wait a brief moment to ensure shader has rendered at least one frame
+    requestAnimationFrame(() => {
+        canvas.classList.add('visible');
+    });
 
     // --- Scroll-based speed control ---
     const defaultSpeed = 1.0;
