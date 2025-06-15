@@ -33,16 +33,20 @@ const darkModeColors = {
 
 export function setupFog(canvas: HTMLCanvasElement) {
     // Handle device pixel ratio for crisp rendering on high-DPI displays
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
+    const updateCanvasSize = () => {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
 
-    // Set the actual size in memory (based on device pixel ratio)
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
+        // Set the actual size in memory (based on device pixel ratio)
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
 
-    // Scale the canvas back down using CSS
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
+        // Don't set CSS size - let the existing CSS handle that
+        // The canvas already has width: 100% and height: 100lvh in CSS
+    };
+
+    // Set initial canvas size
+    updateCanvasSize();
 
     const sandbox = new GlslCanvas(canvas);
     sandbox.load(fragmentSource);
@@ -113,20 +117,6 @@ export function setupFog(canvas: HTMLCanvasElement) {
 
     // Add the 'visible' class to trigger the fade-in after setup
     canvas.classList.add('visible');
-
-    // Handle device pixel ratio changes and window resize
-    const updateCanvasSize = () => {
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-
-        // Set the actual size in memory (based on device pixel ratio)
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-
-        // Scale the canvas back down using CSS
-        canvas.style.width = rect.width + 'px';
-        canvas.style.height = rect.height + 'px';
-    };
 
     // Listen for resize events and device pixel ratio changes
     window.addEventListener('resize', updateCanvasSize);
