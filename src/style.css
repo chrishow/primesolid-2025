@@ -204,7 +204,7 @@ ul {
     position: relative;
     overflow: hidden;
     width: 100%;
-    height: auto;
+    /* height: 70.53%; */
     aspect-ratio: 889/627;
 
     >div:first-child { /* Container for tv screen content */
@@ -384,10 +384,15 @@ ul {
 
 
     & .tv-screen {
-      background: transparent url(i/tv-screen.png) no-repeat center center;
-      background-size: cover;
+      background: transparent url(i/tv-screen-cropped.png) no-repeat center center;
+      background-size: contain;
       mix-blend-mode: lighten;
       pointer-events: none;
+      left: 7%;
+      top: 12%;
+      width: 62%;
+      height: auto;
+      aspect-ratio: 529/404;
     }
 
 
@@ -719,6 +724,69 @@ ul {
     }
     100% {
       transform: translateY(0);
+    }
+  }
+
+  /* TV */
+  .projects .tv {
+    aspect-ratio: 888/925;
+    & .tv-case {
+      background-image: url(/src/i/tv-case-phone.png);
+    }
+
+    > div:first-child { /* TV content */
+      width: 80.1%;
+      height: 58.6%;
+      margin-left: 9.8%;
+      margin-top: 8.6%;
+    }
+
+    .tv-screen {
+      /* background: hotpink; */
+      left: 8%;
+      top: 8%;
+      width: 82%;
+    }
+
+    .back-mask {
+      width: 88%;
+      height: 66%;
+      top: 6%;
+      left: 5%;
+    }
+
+    & .tv-case button {
+      /* background-color: hotpink; */
+      /* border: 1px red solid; */
+      width: 7.4%;
+      height: 6.4%;
+      top: 77.4%;
+      left: 7.4%;
+      /* opacity: 1; */
+      background-image: url(/src/i/button-down-phone.png);
+      mix-blend-mode: darken;
+
+      &[data-channel="2"] {
+        left: 15.6%;
+      }
+
+      &[data-channel="3"] {
+        top: 77.4%;
+        left: 23.4%;;
+      }
+
+      &[data-channel="4"] {
+        top: 77.4%;
+        left: 32.1%;
+      }
+    }
+
+    & .knob-spot {
+      /* outline: 1px red solid; */
+      top: 76.9%;
+      left: 86.7%;
+      width: 7.4%;
+      height: 7%;
     }
   }
 
