@@ -49,7 +49,7 @@ export class TV {
         }
         this.teletextEffect = new TeletextEffect(this.teletextCanvas);
 
-        this.clickSound = new Audio('src/i/click.mp3');
+        this.clickSound = new Audio('/click.mp3');
         this.clickSound.preload = 'auto';
         this.clickSound.volume = 0.6;
 
