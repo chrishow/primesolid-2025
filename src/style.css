@@ -663,9 +663,20 @@ ul {
       opacity: 1;
     }
   }
+}
 
+body.error-404 {
+  margin-block: 0;
 
-
+  .content {
+    padding-block: 0 5em;
+    /* background-color: pink; */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 @media (prefers-color-scheme: light) {
