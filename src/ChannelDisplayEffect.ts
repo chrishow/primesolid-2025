@@ -13,14 +13,18 @@ export class ChannelDisplayEffect extends BaseCrtEffect {
         // Set dimensions based on target display size or desired texture resolution
         this.textCanvas.width = 533; // Adjust as needed
         this.textCanvas.height = 395; // Adjust as needed
+        canvas.style.opacity = '0'; // Hide the canvas visually
         const textCtx = this.textCanvas.getContext('2d');
         if (!textCtx) {
             throw new Error('Could not get 2D context for text rendering');
         }
         this.textCtx = textCtx;
 
-        // Initial texture update (blank)
-        this.updateTextureContent();
+
+        setTimeout(() => {  // Delay to ensure font is ready  
+            this.updateTextureContent();
+            canvas.style.opacity = '';
+        }, 100);
     }
 
     // Implement the abstract method from BaseCRTEffect
@@ -34,7 +38,7 @@ export class ChannelDisplayEffect extends BaseCrtEffect {
 
         // Style the text (match CSS if possible)
         ctx.fillStyle = 'lime';
-        ctx.font = 'bold 36px "Menlo", monospace'; // Adjust size/family
+        ctx.font = 'normal 36px "VCR", monospace'; // Adjust size/family
         // Align text to top-left
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
@@ -56,7 +60,6 @@ export class ChannelDisplayEffect extends BaseCrtEffect {
         if (text !== this.currentText) {
             this.currentText = text;
             this.textureNeedsUpdate = true; // Mark texture as needing update
-            // If visible, update the texture content immediately
             if (this.isVisible) {
                 this.updateTextureContent();
             }
