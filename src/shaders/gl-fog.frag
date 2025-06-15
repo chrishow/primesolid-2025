@@ -2,7 +2,7 @@
 // http://patriciogonzalezvivo.com
 
 #ifdef GL_ES
-precision mediump float;
+precision highp float;
 #endif
 
 uniform vec2 u_resolution; // GlslCanvas provides these automatically
@@ -18,8 +18,8 @@ uniform vec3 u_highlightColor;
 
 float random (in vec2 _st) {
     return fract(sin(dot(_st.xy,
-                       vec2(0.129898,0.78233)))*
-          437.585453123);
+                       vec2(12.9898,78.233)))*
+          43758.5453123);
 }
 
 // Based on Morgan McGuire @morgan3d
@@ -62,22 +62,9 @@ float fbm ( in vec2 _st) {
 void main() {
     // Original normalized coordinates (0.0 to 1.0)
     vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-
-    // Calculate current aspect ratio
-    float aspect = u_resolution.x / u_resolution.y;
     vec2 st = uv;
 
-    // Fix aspect ratio correction for fog effect
-    // We want to maintain the same "density" of fog pattern regardless of screen shape
-    if (aspect > 1.0) {
-        // Wider than tall: compress x to maintain pattern density
-        st.x = (st.x - 0.5) / aspect + 0.5;
-    } else {
-        // Taller than wide: compress y to maintain pattern density  
-        st.y = (st.y - 0.5) * aspect + 0.5;
-    }
-
-    // Scale the corrected coordinates for the effect
+    // Scale the coordinates for the effect
     st *= 3.0; // You might adjust this scaling factor
 
     vec3 color = vec3(0.0);
