@@ -1,5 +1,3 @@
-// import './themeSwitcher.css';
-
 const THEME_KEY = 'theme-preference';
 
 export class ThemeSwitcher {
