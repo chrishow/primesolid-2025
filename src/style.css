@@ -140,18 +140,13 @@ canvas#glslCanvas {
   display: block; 
   background-color: black;
   width: 100%;
-  height: 100%;
+  height: 100lvh; /* Fill screen on phones even when scrolled */
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
 
   &.visible {
     opacity: 1;
   }
-
-  /* Try to fix phone background issue */
-  height: 100vh; /* Fallback for older browsers */
-  height: 100dvh; /* This should adapt to the visible viewport height */
-  width: 100vw; /* Assuming you want full width as well */
 }
 
 

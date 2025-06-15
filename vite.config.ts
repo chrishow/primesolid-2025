@@ -6,5 +6,6 @@ export default defineConfig({
         fullReload(['public/teletext.html']) // Watch the specific file
     ],
     server: {
+        host: '0.0.0.0', // Allow access from any IP
     },
 });
