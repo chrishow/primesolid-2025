@@ -9,6 +9,8 @@ setupFog(canvas);
 
 initializeGlitchEffect('.content >  *:not(div)');
 
-new TV();
+if (document.querySelector('.tv')) {
+  new TV();
+}
 new ThemeSwitcher();
 
