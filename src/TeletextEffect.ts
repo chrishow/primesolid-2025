@@ -1,7 +1,7 @@
 import { BaseCrtEffect } from './BaseCrtEffect';
 import { loadWeather } from './loadWeather';
 
-import teletextStyle from './teletext.css?inline';
+import teletextStyle from './css/teletext.css?inline';
 
 export class TeletextEffect extends BaseCrtEffect {
     // HTML/SVG rendering related properties

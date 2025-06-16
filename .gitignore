@@ -13,6 +13,7 @@ dist-ssr
 *.local
 
 non-site/
+notes.md
 
 # Editor directories and files
 .vscode/*
