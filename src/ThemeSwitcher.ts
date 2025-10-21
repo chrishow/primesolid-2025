@@ -6,6 +6,10 @@ export class ThemeSwitcher {
     private iconAuto: HTMLImageElement;
     private iconLight: HTMLImageElement;
     private iconDark: HTMLImageElement;
+    private iconDarkest: HTMLImageElement;
+    private animationFrameId: number | null = null;
+    private lastX: number = 0;
+    private lastY: number = 0;
 
     constructor() {
         this.createSwitcherHTML();
@@ -14,6 +18,10 @@ export class ThemeSwitcher {
         this.iconAuto = this.themeToggleButton.querySelector('.icon-auto') as HTMLImageElement;
         this.iconLight = this.themeToggleButton.querySelector('.icon-light') as HTMLImageElement;
         this.iconDark = this.themeToggleButton.querySelector('.icon-dark') as HTMLImageElement;
+        this.iconDarkest = this.themeToggleButton.querySelector('.icon-darkest') as HTMLImageElement;
+
+        // Bind the trackCursor method to preserve 'this' context
+        this.trackCursor = this.trackCursor.bind(this);
 
         this.initTheme();
         this.addEventListeners();
@@ -45,9 +53,16 @@ export class ThemeSwitcher {
         this.iconDark.classList.add('icon-dark');
         this.iconDark.style.display = 'none';
 
+        this.iconDarkest = document.createElement('img');
+        this.iconDarkest.src = '/theme-icon-darkest.svg';
+        this.iconDarkest.alt = 'Darkest theme';
+        this.iconDarkest.classList.add('icon-darkest');
+        this.iconDarkest.style.display = 'none';
+
         this.themeToggleButton.appendChild(this.iconAuto);
         this.themeToggleButton.appendChild(this.iconLight);
         this.themeToggleButton.appendChild(this.iconDark);
+        this.themeToggleButton.appendChild(this.iconDarkest);
 
         this.themeMenu = document.createElement('div');
         this.themeMenu.id = 'theme-menu';
@@ -57,6 +72,7 @@ export class ThemeSwitcher {
             { name: 'Auto', value: 'auto', icon: '/theme-icon-auto.svg' },
             { name: 'Light', value: 'light', icon: '/theme-icon-light.svg' },
             { name: 'Dark', value: 'dark', icon: '/theme-icon-dark.svg' },
+            { name: 'Darkest', value: 'darkest', icon: '/theme-icon-darkest.svg' },
         ];
 
         themes.forEach(theme => {
@@ -83,14 +99,52 @@ export class ThemeSwitcher {
             this.iconAuto.style.display = 'inline-block';
             this.iconLight.style.display = 'none';
             this.iconDark.style.display = 'none';
+            this.iconDarkest.style.display = 'none';
         } else {
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem(THEME_KEY, theme);
             this.iconAuto.style.display = 'none';
             this.iconLight.style.display = theme === 'light' ? 'inline-block' : 'none';
             this.iconDark.style.display = theme === 'dark' ? 'inline-block' : 'none';
+            this.iconDarkest.style.display = theme === 'darkest' ? 'inline-block' : 'none';
         }
+
+        // Handle darkest theme event listeners
+        if (theme === 'darkest') {
+            document.addEventListener('mousemove', this.trackCursor);
+            document.addEventListener('touchmove', this.trackCursor);
+        } else {
+            document.removeEventListener('mousemove', this.trackCursor);
+            document.removeEventListener('touchmove', this.trackCursor);
+            // Cancel any pending animation frame
+            if (this.animationFrameId !== null) {
+                cancelAnimationFrame(this.animationFrameId);
+                this.animationFrameId = null;
+            }
+        }
+
+
         document.dispatchEvent(new CustomEvent('themechanged', { detail: { theme } }));
+    }
+
+    public trackCursor(e: MouseEvent | TouchEvent): void {
+        // Cache touch object to avoid double property access
+        const touch = 'touches' in e ? e.touches[0] : null;
+        const x = touch ? touch.clientX : (e as MouseEvent).clientX;
+        const y = touch ? touch.clientY : (e as MouseEvent).clientY;
+
+        // Store coordinates for RAF update
+        this.lastX = x;
+        this.lastY = y;
+
+        // Use requestAnimationFrame to throttle DOM updates
+        if (this.animationFrameId === null) {
+            this.animationFrameId = requestAnimationFrame(() => {
+                document.documentElement.style.setProperty('--cursorX', this.lastX + 'px');
+                document.documentElement.style.setProperty('--cursorY', this.lastY + 'px');
+                this.animationFrameId = null;
+            });
+        }
     }
 
     private initTheme(): void {
@@ -113,6 +167,12 @@ export class ThemeSwitcher {
             if (button && button.dataset.theme) {
                 this.applyTheme(button.dataset.theme);
                 this.themeMenu.classList.add('hidden');
+
+                if (button.dataset.theme === 'darkest') {
+                    // Store click position for darkest theme effect
+                    document.documentElement.style.setProperty('--cursorX', (event.clientX) + 'px');
+                    document.documentElement.style.setProperty('--cursorY', (event.clientY) + 'px');
+                }
             }
         });
 

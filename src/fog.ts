@@ -68,7 +68,7 @@ export function setupFog(canvas: HTMLCanvasElement) {
         const initialTheme = localStorage.getItem('theme-preference') || 'auto';
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-        if (initialTheme === 'dark') {
+        if (initialTheme === 'dark' || initialTheme === 'darkest') {
             sandbox.setUniform('u_baseColor', ...hexToRgbNormalized(darkModeColors.base));
             sandbox.setUniform('u_lowlightColor', ...hexToRgbNormalized(darkModeColors.lowlight));
             sandbox.setUniform('u_midtoneColor', ...hexToRgbNormalized(darkModeColors.midtone));
@@ -145,7 +145,7 @@ function setupShaderFunctionality(sandbox: any, canvas: HTMLCanvasElement) {
     document.addEventListener('themechanged', (e: Event) => {
         const event = e as CustomEvent;
         const theme = event.detail.theme;
-        if (theme === 'dark') {
+        if (theme === 'dark' || theme === 'darkest') {
             disableAutoThemeUpdates();
             setShaderColors(darkModeColors);
         } else if (theme === 'light') {
@@ -158,7 +158,7 @@ function setupShaderFunctionality(sandbox: any, canvas: HTMLCanvasElement) {
 
     // Initial theme setup based on current preference (including 'auto')
     const initialTheme = localStorage.getItem('theme-preference') || 'auto';
-    if (initialTheme === 'dark') {
+    if (initialTheme === 'dark' || initialTheme === 'darkest') {
         setShaderColors(darkModeColors);
         // OS listener not needed for explicit dark theme
     } else if (initialTheme === 'light') {
