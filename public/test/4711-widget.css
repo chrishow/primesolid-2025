@@ -1,6 +1,7 @@
 #my-form {
     /* background-color: hotpink; */
     max-width: 800px;
+    margin-inline: auto;
 
     .headline-field {
         margin-bottom: -0.25em;
