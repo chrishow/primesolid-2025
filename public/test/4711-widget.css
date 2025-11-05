@@ -94,6 +94,21 @@
     }
 
 
+    .confirmation-content {
+        img {
+            width: 300px;
+            height: auto;
+            display: block;
+            margin-inline: auto;
+        }
+
+        .copy {
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    }
+
 
     
 
