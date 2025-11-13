@@ -1,4 +1,4 @@
-#my-form {
+.form-builder-form {
     max-width: 800px;
 
     .headline-field {
@@ -108,8 +108,4 @@
             line-height: 1.5;
         }
     }
-
-
-    
-
 }
